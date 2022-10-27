@@ -4,7 +4,7 @@ from matplotlib.animation import FuncAnimation
 class agent:
     pass
 
-n=2
+n=5
 size=20
 fig=plt.figure()
 ax = plt.axes(xlim=(0, size), ylim=(0, size))
@@ -41,17 +41,6 @@ while change!=0:
                     a.squares.append(square+target[2]+target[1]*size)
                     a.edgesquares.append(square+target[2]+target[1]*size)
                     surrounded=False
-                elif len(agents[target[0]].squares)<len(a.squares):
-                    grid[square//size+target[1]][square%size+target[2]]=a.no
-                    a.squares.append(square+target[2]+target[1]*size)
-                    a.edgesquares.append(square+target[2]+target[1]*size)
-                    surrounded=False
-                    
-                    try:
-                        agents[target[0]].squares.remove(square+target[2]+target[1]*size)
-                        agents[target[0]].edgesquares.remove(square+target[2]+target[1]*size)
-                    except:
-                        pass
             try:
                 a.edgesquares.remove(square)
             except:
