@@ -26,6 +26,7 @@ for i in range(n):
 bar=ax.bar([a.no for a in agents],[a.population for a in agents])
 change=1
 def neighbour(square,a,agents):
+    targets=[]
     for i in (-1,0,1):
         for j in (-1,0,1):
             x=square%size+i
@@ -44,34 +45,37 @@ while change!=0:
                 a.edgesquares.remove(square)
             else:
                 surrounded=False
-            for i in (-1,0,1):
-                for j in (-1,0,1):
-                    x=square%size+i
-                    y=square//size+j
-                    if abs(i+j)==1 and x not in (-1,size) and y not in (-1,size):
-                        target=grid[x][y][0]
-                        if target==-1:
-                            grid[x][y][0]=a.no
-                            a.population+=grid[x][y][1]
-                            newsquare=x+y*size
-                            a.squares.append(newsquare)
-                            a.edgesquares.append(newsquare)
-                            surrounded=False
-                        elif agents[target].population<a.population:
-                            target=agents[target]
-                            grid[x][y][0]=a.no
-                            a.population+=grid[x][y][1]
-                            target.population-=grid[x][y][1]
-                            newsquare=x+y*size
-                            a.squares.append(x+y*size)
-                            a.edgesquares.append(newsquare)
-                            target.squares.remove(newsquare)
-                            try:
-                                target.edgesquares.remove(newsquare)
-                            except:
-                                pass
+            targets=neighbour(square,a,agents)
+            for target in targets:
+                target,x,y=target[0],target[1],target[2]
+                if target==-1:
+                    grid[x][y][0]=a.no
+                    a.population+=grid[x][y][1]
+                    newsquare=x+y*size
+                    a.squares.append(newsquare)
+                    a.edgesquares.append(newsquare)
+                    surrounded=False
+                elif agents[target].population<a.population:
+                    target=agents[target]
+                    grid[x][y][0]=a.no
+                    a.population+=grid[x][y][1]
+                    target.population-=grid[x][y][1]
+                    newsquare=x+y*size
+                    a.squares.append(x+y*size)
+                    a.edgesquares.append(newsquare)
+                    target.squares.remove(newsquare)
+                    
+                    surrounded=False
+                    targetneighbour=neighbour(newsquare,a,agents)
+                    for newtarget in targetneighbour:
+                        if newtarget[0]==target.no:
+                            target.edgesquares.append(newtarget[1]+newtarget[2]*size)
+                    try:
+                        target.edgesquares.remove(newsquare)
+                    except:
+                        pass
             
         #bar[a.no].set_height(a.population)
         ax.plot([i%size for i in a.squares],[j//size for j in a.squares],"sC%d" %a.no)
     plt.show(block=False)
-    plt.pause(0.1)
+    plt.pause(0.001)
