@@ -42,7 +42,6 @@ while change!=0:
         while surrounded:
             if len(a.edgesquares)!=0:
                 square=int(choice(a.edgesquares))
-                a.edgesquares.remove(square)
             else:
                 surrounded=False
             targets=neighbour(square,a,agents)

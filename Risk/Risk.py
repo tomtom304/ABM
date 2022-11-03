@@ -22,9 +22,48 @@ for i in range(n):
     grid[a.x][a.y]=a.no
     agents.append(a)
 scatter=ax.scatter
-plt.show(block=False)
-plt.pause(0.1)
 change=1
+def neighbour4(square,a):
+    targets=[]
+    for i in (-1,0,1):
+        for j in (-1,0,1):
+            x=square%size+i
+            y=square//size+j
+            if abs(i+j)==1 and x not in (-1,-2,size) and y not in (-1,-2,size):
+                targets.append([grid[x][y],x,y])
+    return targets
+def neighbour9(square,a):
+    targets=[]
+    for i in (-1,0,1):
+        for j in (-1,0,1):
+            x=square%size+i
+            y=square//size+j
+            if abs(i)+abs(j)!=0 and x not in (-1,-2,size) and y not in (-1,-2,size):
+                targets.append([grid[x][y],x,y])
+    return targets
+
+def neighbour4f(square,a):
+    targets=[]
+    for i in (-1,0,1):
+        for j in (-1,0,1):
+            x=square%size+i
+            y=square//size+j
+            if abs(i+j)==1 and x not in (-1,-2,size) and y not in (-1,-2,size) and grid[x][y]!=a.no:
+                targets.append([grid[x][y],x,y])
+    return targets
+
+def combat1(a,target,x,y):
+    if target.size<a.size:
+        return True
+    else:
+        return False
+def combat2(a,target,x,y):
+    if a.size>random()*(a.size+target.size):
+        return True
+    else:
+        return False
+def combat3(a,target,x,y):
+    return False
 while change!=0:
     ax.clear()
     for a in agents:
@@ -32,31 +71,40 @@ while change!=0:
         while surrounded:
             if len(a.edgesquares)!=0:
                 square=int(choice(a.edgesquares))
+                a.edgesquares.remove(square)
+                targets=neighbour4f(square,a)
+                if len(targets)!=0:
+                    surrounded=False
             else:
                 surrounded=False
-            for target in [[grid[square//size+i][square%size+j],i,j] for i in (-1,0,1) for j in (-1,0,1) if abs(i+j)==1 and square//size+i not in (-1,size) and square%size+j not in (-1,size)]:
-                if target[0]==-1:
-                    grid[square//size+target[1]][square%size+target[2]]=a.no
-                    a.size+=1
-                    a.squares.append(square+target[2]+target[1]*size)
-                    a.edgesquares.append(square+target[2]+target[1]*size)
-                    surrounded=False
-                elif agents[target[0]].size<a.size:
-                    grid[square//size+target[1]][square%size+target[2]]=a.no
-                    a.squares.append(square+target[2]+target[1]*size)
-                    a.edgesquares.append(square+target[2]+target[1]*size)
-                    surrounded=False
-                    a.size+=1
-                    try:
-                        agents[target[0]].squares.remove(square+target[2]+target[1]*size)
-                        agents[target[0]].size-=1
-                        agents[target[0]].edgesquares.remove(square+target[2]+target[1]*size)
-                    except:
-                        pass
-            try:
-                a.edgesquares.remove(square)
-            except:
-                pass
+        for target in targets:
+            targetno,x,y=target[0],target[1],target[2]
+            targetag=agents[targetno]
+            if targetno==-1:
+                grid[x][y]=a.no
+                a.size+=1
+                newsquare=x+y*size
+                a.squares.append(newsquare)
+                a.edgesquares.append(newsquare)
+            elif combat2(a,targetag,x,y):
+                grid[x][y]=a.no
+                newsquare=x+y*size
+                a.squares.append(x+y*size)
+                a.edgesquares.append(newsquare)
+                targetag.squares.remove(newsquare)
+                a.size+=1
+                targetneighbour=neighbour4(newsquare,a)
+                for newtarget in targetneighbour:
+                    if newtarget[0]==targetag.no:
+                        targetag.edgesquares.append(newtarget[1]+newtarget[2]*size)
+                try:
+                    targetag.edgesquares.remove(newsquare)
+                except:
+                    pass
+                
+            
+
         ax.plot([i%size for i in a.squares],[j//size for j in a.squares],"sC%d" %a.no)
+        #ax.plot([i%size for i in a.edgesquares],[j//size for j in a.edgesquares],"sC%d" %int(a.no+5))
     plt.show(block=False)
     plt.pause(0.01)

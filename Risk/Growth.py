@@ -5,7 +5,7 @@ class agent:
     pass
 
 n=5
-size=20
+size=50
 fig=plt.figure()
 ax = plt.axes(xlim=(0, size), ylim=(0, size))
 grid = [[-1 for i in range(size)] for j in range(size)]
@@ -26,6 +26,18 @@ for a in agents:
 plt.show(block=False)
 plt.pause(0.1)
 change=1
+def neighbour(square,a,agents):
+    targets=[]
+    for i in (-1,0,1):
+        for j in (-1,0,1):
+            x=square%size+i
+            y=square//size+j
+            if abs(i+j)==1 and x not in (-1,size) and y not in (-1,size):
+                targets.append([grid[x][y],x,y])
+    return targets
+
+
+
 while change!=0:
     ax.clear()
     for a in agents:
@@ -33,18 +45,18 @@ while change!=0:
         while surrounded:
             if len(a.edgesquares)!=0:
                 square=int(choice(a.edgesquares))
+                a.edgesquares.remove(square)
             else:
                 surrounded=False
-            for target in [[grid[square//size+i][square%size+j],i,j] for i in (-1,0,1) for j in (-1,0,1) if abs(i+j)==1 and square//size+i not in (-1,size) and square%size+j not in (-1,size)]:
-                if target[0]==-1:
-                    grid[square//size+target[1]][square%size+target[2]]=a.no
-                    a.squares.append(square+target[2]+target[1]*size)
-                    a.edgesquares.append(square+target[2]+target[1]*size)
+            targets=neighbour(square,a,agents)
+            for target in targets:
+                target,x,y=target[0],target[1],target[2]
+                if target==-1:
+                    grid[x][y]=a.no
+                    newsquare=x+y*size
+                    a.squares.append(newsquare)
+                    a.edgesquares.append(newsquare)
                     surrounded=False
-            try:
-                a.edgesquares.remove(square)
-            except:
-                pass
         ax.plot([i%size for i in a.squares],[j//size for j in a.squares],"sC%d" %a.no)
     plt.show(block=False)
-    plt.pause(0.01)
+    plt.pause(0.1)
