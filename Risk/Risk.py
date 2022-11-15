@@ -90,7 +90,7 @@ class agent1(baseagent):
             neighbours=self.neighbour(target)
             self.edgesquares+=[i[1]+i[2]*size for i in neighbours]
                 
-        elif combat1(a,targetagent,x,y):
+        elif combat3(a,targetagent,x,y):
             grid[x][y]=a.no
             targetagent.edgesquares.append(target)
             self.squares.append(target)
@@ -99,17 +99,6 @@ class agent1(baseagent):
             targetagent.size-=1
             targetneighbour=targetagent.neighbour(target)
             self.edgesquares+=[i[1]+i[2]*size for i in targetneighbour]
-        
-n=3
-size=50
-fig=plt.figure()
-ax = plt.axes(xlim=(0, size), ylim=(0, size))
-grid = [[-1 for i in range(size)] for j in range(size)]
-agents=[]
-for i in range(n):    
-    a=agent1(i)
-    agents.append(a)
-change=1
 
 def combat1(a,target,x,y):
     return target.size<a.size
@@ -117,8 +106,27 @@ def combat2(a,target,x,y):
     return a.size>random()*(a.size+target.size)
 def combat3(a,target,x,y):
     return False
+def combat4(a,target,x,y):
+    return random()>0.5
+n=3
+size=50
+fig,ax=plt.subplots(2)
+ax[0].set_ylim(0,size)
+ax[0].set_xlim(0,size)
+fig.set_size_inches(4, 8)
+fig.set_dpi(120)
+grid = [[-1 for i in range(size)] for j in range(size)]
+agents=[]
+for i in range(n):    
+    a=agent8(i)
+    agents.append(a)
+change=1
+
+
+
+bar=ax[1].bar(range(n),[a.size for a in agents],color=["C%d" %a.no for a in agents])
 while change!=0:
-    ax.clear()
+    ax[0].clear()
     for a in agents:
         surrounded=True
         if len(a.edgesquares)!=0:
@@ -127,7 +135,9 @@ while change!=0:
                     
         
 
-        ax.plot([i%size for i in a.squares],[j//size for j in a.squares],"sC%d" %a.no)
+        ax[0].scatter([i%size for i in a.squares],[j//size for j in a.squares],marker="s",s=16)
+        bar[a.no].set_height(a.size)
         #ax.plot([i%size for i in a.edgesquares],[j//size for j in a.edgesquares],"sC%d" %int(a.no+5))
+    
     plt.show(block=False)
     plt.pause(0.001)
