@@ -115,6 +115,9 @@ class combattypes:
     def combat7(self,a,targetagent,targetsquare): #pretty
         x,y=targetsquare%size,targetsquare//size
         return (a.x-x)**2+(a.y-y)**2<(targetagent.x-x)**2+(targetagent.y-y)**2
+    def combat8(self,a,targetagent,targetsquare): #pretty
+        x,y=targetsquare%size,targetsquare//size
+        return abs(a.x-x)+abs(a.y-y)<abs(targetagent.x-x)+abs(targetagent.y-y)
 class agent8(baseagent):
     def __init__(self,no):
         super().__init__(no)
@@ -126,8 +129,6 @@ class agent8(baseagent):
         return self.n.neighbour8(square)
     def growth(self):
         self.g.growthn(self)
-    def combat(self,targetagent,targetsquare):
-        return self.c.combat7(self,targetagent,targetsquare)
 class agent4(baseagent):
     def __init__(self,no):
         super().__init__(no)
@@ -139,8 +140,6 @@ class agent4(baseagent):
         return self.n.neighbour4(square)
     def growth(self):
         self.g.growthn(self)
-    def combat(self,targetagent,targetsquare):
-        return self.c.combat6(self,targetagent,targetsquare)
 class agent1(baseagent):
     def __init__(self,no):
         super().__init__(no)
@@ -153,11 +152,16 @@ class agent1(baseagent):
         return self.n.neighbour4(square)
     def growth(self):
         self.g.growth1(self)
+
+
+class agent(agent8):
+    def __init__(self,no):
+        super().__init__(no)
+        self.c=combattypes()
     def combat(self,targetagent,targetsquare):
-        return self.c.combat6(self,targetagent,targetsquare)
-
-
-n=1
+        return self.c.combat8(self,targetagent,targetsquare)
+    
+n=10
 size=50
 fig,ax=plt.subplots(2)
 ax[0].set_ylim(0,size, auto=False)
@@ -168,7 +172,7 @@ fig.set_dpi(125)
 grid = [[-1 for i in range(size)] for j in range(size)]
 agents=[]
 for i in range(n):    
-    a=agent8(i)
+    a=agent(i)
     agents.append(a)
 change=n
 
