@@ -98,7 +98,7 @@ class growthtypes:
             
 class combattypes:           
     def combat1(self,a,targetagent,targetsquare): #functional but random
-        return target.size<a.size
+        return targetagent.size<a.size
     def combat2(self,a,targetagent,targetsquare): #functional but very random
         return a.size>random()*(a.size+target.size)
     def combat3(self,a,targetagent,targetsquare): #pretty
@@ -159,7 +159,7 @@ class agent(agent8):
         super().__init__(no)
         self.c=combattypes()
     def combat(self,targetagent,targetsquare):
-        return self.c.combat8(self,targetagent,targetsquare)
+        return self.c.combat6(self,targetagent,targetsquare)
     
 n=10
 size=50
