@@ -117,7 +117,7 @@ class combattypes:
     def combat6(self,a,targetagent,targetsquare): #pretty, maybe functional
         combatants=neighbourtypes().neighbour16(targetsquare)
         adv=int(a.size>targetagent.size)
-        return len([s for s in combatants if s[0]==a.no])+adv>len([s for s in combatants if s[0]==targetagent.no])
+        return len([s for s in combatants if s[0]==a.no])+adv>=len([s for s in combatants if s[0]==targetagent.no])
     def combat7(self,a,targetagent,targetsquare): #pretty
         x,y=targetsquare%size,targetsquare//size
         return (a.x-x)**2+(a.y-y)**2<(targetagent.x-x)**2+(targetagent.y-y)**2
@@ -133,6 +133,17 @@ class agent8(baseagent):
         self.c=combattypes()
     def neighbour(self,square):
         return self.n.neighbour8(square)
+    def growth(self):
+        return self.g.growthn(self)
+class agent16(baseagent):
+    def __init__(self,no):
+        super().__init__(no)
+        self.edgesquares=[self.x+self.y*size]
+        self.n=neighbourtypes()
+        self.g=growthtypes()
+        self.c=combattypes()
+    def neighbour(self,square):
+        return self.n.neighbour16(square)
     def growth(self):
         return self.g.growthn(self)
 class agent4(baseagent):
@@ -165,9 +176,9 @@ class agent(agent4):
         super().__init__(no)
         self.c=combattypes()
     def combat(self,targetagent,targetsquare):
-        return self.c.combat6(self,targetagent,targetsquare)
+        return self.c.combat2(self,targetagent,targetsquare)
     
-n=3
+n=10
 size=50
 fig,ax=plt.subplots(2)
 ax[0].set_ylim(0,size, auto=False)
@@ -188,8 +199,8 @@ ax[1].set_ylim(0,size**2, auto=True)
 while change!=0:
     change=n
     ax[0].clear()
-    #ax[0].set_ylim(-1,size, auto=False)
-    #ax[0].set_xlim(-1,size, auto=False)
+    ax[0].set_ylim(-1,size, auto=False)
+    ax[0].set_xlim(-1,size, auto=False)
     
     for a in agents:
         if len(a.edgesquares)!=0:
@@ -203,7 +214,7 @@ while change!=0:
                     
         ax[0].scatter([i%size for i in a.squares],[j//size for j in a.squares],marker="s",s=16)
         bar[a.no].set_height(a.size)
-        ax[0].scatter([i%size for i in a.edgesquares],[j//size for j in a.edgesquares],marker="s",s=16, color="C%d" %int(a.no+5))
+        #ax[0].scatter([i%size for i in a.edgesquares],[j//size for j in a.edgesquares],marker="s",s=16, color="C%d" %int(a.no+5))
     
     plt.show(block=False)
     plt.pause(0.001)
