@@ -9,6 +9,9 @@ class baseagent:
         self.squares=[self.x+self.y*size]
         self.size=1
         grid[self.x][self.y]=self.no
+        self.n=neighbourtypes()
+        self.g=growthtypes()
+        self.c=combattypes()
 
 class neighbourtypes:
     def neighbour4(self,square):
@@ -41,6 +44,15 @@ class neighbourtypes:
         return targets
     
 class growthtypes:
+    def general(self,a,targets):
+        for target in targets:
+            targetno,x,y=target[0],target[1],target[2]
+            if targetno==-1:
+                grid[x][y]=a.no
+                a.size+=1
+                newsquare=x+y*size
+                a.squares.append(newsquare)
+                a.gainedgesquare(target)
     def growthn(self,a):
         new=[]
         surrounded=True
@@ -54,7 +66,7 @@ class growthtypes:
             targetno,x,y=target[0],target[1],target[2]
             targetagent=agents[targetno]
             newsquare=x+y*size
-            if targetno==-1:
+            if targetno==-1: 
                 grid[x][y]=a.no
                 a.size+=1
                 a.squares.append(newsquare)
@@ -106,7 +118,7 @@ class combattypes:
     def combat1(self,a,targetagent,targetsquare): #functional but random
         return targetagent.size<a.size
     def combat2(self,a,targetagent,targetsquare): #functional but very random
-        return a.size>random()*(a.size+target.size)
+        return a.size>random()*(a.size+targetagent.size)
     def combat3(self,a,targetagent,targetsquare): #pretty
         return False
     def combat4(self,a,targetagent,targetsquare): #very random
@@ -128,9 +140,7 @@ class agent8(baseagent):
     def __init__(self,no):
         super().__init__(no)
         self.edgesquares=[self.x+self.y*size]
-        self.n=neighbourtypes()
-        self.g=growthtypes()
-        self.c=combattypes()
+        
     def neighbour(self,square):
         return self.n.neighbour8(square)
     def growth(self):
@@ -171,7 +181,7 @@ class agent1(baseagent):
         return self.g.growth1(self)
 
 
-class agent(agent4):
+class agent(agent8):
     def __init__(self,no):
         super().__init__(no)
         self.c=combattypes()
