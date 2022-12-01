@@ -99,12 +99,13 @@ fig.set_dpi(125)
 grid = [[[-1,0] for i in range(ysize)] for j in range(xsize)]
 border=[]
 for i in range(ysize-1):
-    border.append([30,i])
-    border.append([50,i+1])
-for i in range(17):
-    border.append([i+32,25])
+    border.append([25,i])
+    border.append([55,i+1])
+for i in range(27):
+    border.append([i+27,25])
 for i in border:
     grid[i[0]][i[1]][1]=1
+blocked=len(border)
 ax[0].scatter([i[0] for i in border],[i[1] for i in border],color="black",marker="s",s=16)
 agents=[]
 for i in range(n):    
@@ -127,8 +128,6 @@ while end<3:
                 change-=1
         else:
             change-=1
-        if a.size==xsize*ysize:
-            change=0
         ax[0].scatter([i[0] for i in border],[i[1] for i in border],color="black",marker="s",s=16)            
         ax[0].scatter([i%xsize for i in a.squares],[j//xsize for j in a.squares],marker="s",s=16)
         bar[a.no].set_height(a.size)
