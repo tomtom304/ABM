@@ -28,11 +28,11 @@ class world():
 class civ():
     def __init__(self,no):
         self.no=no
-        self.x=randint(0,width)
-        self.y=randint(0,height)
+        self.x=randint(0,width-1)
+        self.y=randint(0,height-1)
         while world.tiles[self.x,self.y].owner!=0:
-            self.x=randint(0,width)
-            self.y=randint(0,height)
+            self.x=randint(0,width-1)
+            self.y=randint(0,height-1)
         world.tiles[self.x,self.y].owner=self.no
         world.tiles[self.x,self.y].pop=1
         self.edgesquares=np.array([[self.x,self.y]])
@@ -44,21 +44,23 @@ class civ():
         self.squares+=[[x,y]]
         self.edgesquares+=[[x,y]]
     def losesquare(self,a,x,y,square):
-        self.edgesquares.remove([x,y])
-        self.squares.remove([x,y])
+        self.edgesquares=self.edgesquares[self.edgesquares!=[x,y]]
+        self.squares=self.squares[self.squares!=[x,y]]
         for i in world.tiles[x,y].neighbours:
             if i not in self.edgesquares and i in self.squares:
                     self.edgesquares+=[[x,y]]
     def expand(self):
+        print("expanding")
         new=0
         surrounded=True
         while surrounded:
             square=choice(self.edgesquares)
-            targets=[newsquare for newsquare in world.tiles[square].neighbours if newsquare not in self.squares]
+            targets=[newsquare for newsquare in world.tiles[tuple(square)].neighbours if newsquare not in self.squares]
+            print(targets)
             if len(targets)!=0:
                 surrounded=False
             else:
-                self.edgesquares.remove(square)
+                self.edgesquares=self.edgesquares[self.edgesquares!=square]
                 if len(self.edgesquares)==0:
                     surrounded=False
                     new=1
@@ -75,7 +77,7 @@ class civ():
 ##                    new+=1
         return new==0
     
-n=1
+n=4
 width=80
 height=50
 fig,ax=plt.subplots(2)
@@ -106,8 +108,7 @@ while end<5:
         else:
             change-=1
         ax[0].scatter(a.squares[:,0],a.squares[:,1],marker="s",s=16)
-        bar[a.no].set_height(a.size)
-        #ax[0].scatter([i%width for i in a.edgesquares],[j//width for j in a.edgesquares],marker="s",s=16, color="C%d" %int(a.no+5))
+        ax[0].scatter([i%width for i in a.edgesquares],[j//width for j in a.edgesquares],marker="s",s=16, color="C%d" %int(a.no+5))
     if change==0:
         end+=1
     else:
