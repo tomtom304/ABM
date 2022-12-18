@@ -11,7 +11,7 @@ class tile():
         for i in (-1,0,1):
             for j in (-1,0,1):
                 if abs(i+j)==1 and -1<x+i and x+i<width and y+j>-1 and y+j<height:
-                    self.neighbours.append([x,y])
+                    self.neighbours.append([x+i,y+j])
         self.owner=0
         self.pop=0
 class world():
@@ -50,13 +50,13 @@ class civ():
             if i not in self.edgesquares and i in self.squares:
                     self.edgesquares+=[[x,y]]
     def expand(self):
-        print("expanding")
         new=0
         surrounded=True
         while surrounded:
             square=choice(self.edgesquares)
-            targets=[newsquare for newsquare in world.tiles[tuple(square)].neighbours if newsquare not in self.squares]
-            print(targets)
+            print(world.tiles[tuple(square)].neighbours,self.squares)
+            targets=[newsquare for newsquare in world.tiles[tuple(square)].neighbours if list(newsquare) not in self.squares]
+            print([newsquare for newsquare in world.tiles[tuple(square)].neighbours])
             if len(targets)!=0:
                 surrounded=False
             else:
