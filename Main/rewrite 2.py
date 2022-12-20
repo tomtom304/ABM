@@ -4,7 +4,7 @@ import numpy as np
 
 class tile():
     def __init__(self,x,y):
-        self.terrain=""
+        self.terrain=plain
         self.x,self.y=x,y
         self.river=""
         self.neighbours=[]
@@ -35,13 +35,21 @@ class civ():
             self.x=randint(0,width-1)
             self.y=randint(0,height-1)
         world.tiles[self.x,self.y].owner=self.no
-        world.tiles[self.x,self.y].pop=1
+        world.tiles[self.x,self.y].pop=100
         self.edgesquares=[[self.x,self.y]]
         self.squares=[[self.x,self.y]]
+    def tick(self):
+        for square in self.squares:
+            tile=world.tiles[tuple(square)]
+            tile.pop*=popgrowth
+            if tile.pop>tile.terrain["food"]:
+                if square in self.edgesquares:
+                    self.expand(tile)
 ##    def combat(self,targetagent,targetsquare,terrain):
 ##        return self.c.combat2(self,targetagent,targetsquare)
     def gainsquare(self,target):
         target.owner=self.no
+        target.pop+=10
         self.squares+=[[target.x,target.y]]
         self.edgesquares+=[[target.x,target.y]]
 ##    def losesquare(self,a,x,y,square):
@@ -50,29 +58,33 @@ class civ():
 ##        for i in world.tiles[x,y].neighbours:
 ##            if i not in self.edgesquares and i in self.squares:
 ##                    self.edgesquares+=[[x,y]]
-    def expand(self):
-        new=0
-        surrounded=True
-        while surrounded:
-            square=choice(self.edgesquares)
-            targets=[world.tiles[tuple(newsquare)] for newsquare in world.tiles[tuple(square)].neighbours if not any((newsquare == x).all() for x in self.squares)]
-            if len(targets)!=0:
-                surrounded=False
-            else:
-                self.edgesquares.remove(square)
-                if len(self.edgesquares)==0:
-                    surrounded=False
-                    new=1
-        for target in targets:
-            if target.owner==-1:
-                self.gainsquare(target)
-                new+=1
+    def expand(self,target):
+##        surrounded=True
+##        while surrounded:
+##            square=choice(self.edgesquares)
+##            targets=[world.tiles[tuple(newsquare)] for newsquare in world.tiles[tuple(square)].neighbours if not any((newsquare == x).all() for x in self.squares)]
+##            if len(targets)!=0:
+##                surrounded=False
+##            else:
+##                self.edgesquares.remove(square)
+##                if len(self.edgesquares)==0:
+##                    surrounded=False
+##                    new=1
+        targets=[world.tiles[tuple(newsquare)] for newsquare in target.neighbours if not any((newsquare == x).all() for x in self.squares)]
+        if len(targets)==0:
+            self.edgesquares.remove([target.x,target.y])
+        for new in targets:
+            if new.owner==-1:
+                self.gainsquare(new)
+                target.pop-=10
 ##                elif self.combat(targetagent,newsquare,terrain):
 ##                    self.gainsquare(x,y,newsquare)
 ##                    targetagent.losesquare(self,x,y,newsquare)
-##                    new+=1
-        return new==0
-    
+popgrowth=1.05
+plain={"food":100,"defence":1,"move":1}
+desert={"food":10,"defence":2,"move":1}
+mountain={"food":20,"defence":3,"move":2}
+   
 n=10
 width=80
 height=50
@@ -88,27 +100,16 @@ for i in range(n):
     a=civ(i)
     agents.append(a)
     ax[0].scatter([i[0] for i in a.squares],[i[1] for i in a.squares],marker="s",s=16)
-change=n
-end=0
 ax[1].set_ylim(0,width*height, auto=True)
-while end<5:
-    change=n
+while True:
+    print("tick")
     ax[0].clear()
     ax[0].set_ylim(-1,height, auto=False)
     ax[0].set_xlim(-1,width, auto=False)
-    
     for a in agents:
-        if len(a.edgesquares)!=0:
-            if a.expand():
-                change-=1
-        else:
-            change-=1
+        a.tick()
         ax[0].scatter([i[0] for i in a.squares],[i[1] for i in a.squares],marker="s",s=16)
-        #ax[0].scatter([i[0] for i in a.edgesquares],[i[1] for i in a.edgesquares],marker="s",s=16, color="C%d" %int(a.no+5))
-    if change==0:
-        end+=1
-    else:
-        end=0
+        ax[0].scatter([i[0] for i in a.edgesquares],[i[1] for i in a.edgesquares],marker="s",s=16, color="C%d" %int(a.no+1))
     plt.show(block=False)
     plt.pause(0.001)
 print("fin")
