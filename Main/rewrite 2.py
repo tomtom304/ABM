@@ -45,6 +45,10 @@ class civ():
             if tile.pop>tile.terrain["food"]:
                 if square in self.edgesquares:
                     self.expand(tile)
+                else:
+                    new=world.tiles[tuple(choice(tile.neighbours))]
+                    new.pop+=10
+                    tile.pop-=10
 ##    def combat(self,targetagent,targetsquare,terrain):
 ##        return self.c.combat2(self,targetagent,targetsquare)
     def gainsquare(self,target):
@@ -73,7 +77,8 @@ class civ():
         targets=[world.tiles[tuple(newsquare)] for newsquare in target.neighbours if not any((newsquare == x).all() for x in self.squares)]
         if len(targets)==0:
             self.edgesquares.remove([target.x,target.y])
-        for new in targets:
+        else:
+            new=choice(targets)
             if new.owner==-1:
                 self.gainsquare(new)
                 target.pop-=10
@@ -109,7 +114,7 @@ while True:
     for a in agents:
         a.tick()
         ax[0].scatter([i[0] for i in a.squares],[i[1] for i in a.squares],marker="s",s=16)
-        ax[0].scatter([i[0] for i in a.edgesquares],[i[1] for i in a.edgesquares],marker="s",s=16, color="C%d" %int(a.no+1))
+        #ax[0].scatter([i[0] for i in a.edgesquares],[i[1] for i in a.edgesquares],marker="s",s=16, color="C%d" %int(a.no+1))
     plt.show(block=False)
     plt.pause(0.001)
 print("fin")
