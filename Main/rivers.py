@@ -16,8 +16,8 @@ class River:
             self.stepx = -1
         if self.direction[1]<0.:
             self.stepy = -1
-        print ('   *** start river at',fullmap.tiles[pos[0]][pos[1]].ttype,pos," --> ",self.startpos," --> ",self.direction,
-               "with",(len(self.links)-1),"links.")
+        #print ('   *** start river at',fullmap.tiles[pos[0]][pos[1]].ttype,pos," --> ",self.startpos," --> ",self.direction,
+               #"with",(len(self.links)-1),"links.")
 
     def pick_corner_of_tile(self,pos,fullmap):
         # when picking a tile, wemust one of the four corners - this happens at random

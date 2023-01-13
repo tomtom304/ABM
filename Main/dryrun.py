@@ -10,7 +10,7 @@ NTILES   = (50, 50)
 TDIM      = (30, 30)
 MARGIN  = 2
 # display for executable test?
-DISPLAY = False
+DISPLAY = True
 # type of map: 'continent' or 'mediterranean'
 MAPTYPE = 'mediterranean'
 # number of timesteps

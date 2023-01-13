@@ -43,25 +43,22 @@ class MapDisplay:
                 x1 = river.links[i+1][0]
                 y1 = river.links[i+1][1]
                 if x1<x0:
-                    helpx = x0
-                    x0 = x1
-                    x1 = helpx
+                    x0,x1=x1,x0
                 if y1<y0:
-                    helpy = y0
-                    y0 = y1
-                    y1 = helpy
-                xsize = (x1-x0)*self.tdim[0]
-                ysize = (y1-y0)*self.tdim[1]
+                    y0,y1=y1,y0
+
+                xsize = (x1-x0)*self.tdim[0]+4*self.margin
+                ysize = (y1-y0)*self.tdim[1]+4*self.margin
                 if x1==x0:
-                    xsize = 6*self.margin
+                    xsize = 4*self.margin
                 if y1==y0:
-                    ysize = 6*self.margin
+                    ysize = 4*self.margin
                 if self.display:
-                    pygame.draw.rect(self.screen,SEA,pygame.Rect(x0*self.tdim[0], y0*self.tdim[1], xsize, ysize))
+                    pygame.draw.rect(self.screen,SEA,pygame.Rect(x0*self.tdim[0]-2*self.margin, y0*self.tdim[1]-2*self.margin, xsize, ysize))
                     if  x1==self.ntiles[0]-1:
-                        pygame.draw.rect(self.screen,SEA,pygame.Rect( x1*self.tdim[0], y0*self.tdim[1], xsize, ysize))
+                        pygame.draw.rect(self.screen,SEA,pygame.Rect( x1*self.tdim[0]-2*self.margin, y0*self.tdim[1]-2*self.margin, xsize, ysize))
                     if  y1==self.ntiles[1]-1:
-                        pygame.draw.rect(self.screen,SEA,pygame.Rect( x0*self.tdim[0], y1*self.tdim[1], xsize, ysize))
+                        pygame.draw.rect(self.screen,SEA,pygame.Rect( x0*self.tdim[0]-2*self.margin, y1*self.tdim[1]-2*self.margin, xsize, ysize))
                 #print ("drawing [",x0,y0,"] -> [",x1,y1,"]")
 
     def display_colour(self,tile):

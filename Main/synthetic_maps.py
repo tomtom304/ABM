@@ -6,7 +6,7 @@ import mapdisplay as display
 import rivers  as rivers
 
 # dimensions of map in tiles
-NTILES   = (50, 50)
+NTILES   = (30, 20)
 TDIM      = (10, 10)
 MARGIN  = 2
 # display for executable test?
@@ -78,7 +78,7 @@ class Map:
             ttype  = 'plains'
         elif self.maptype=='mediterranean':
             ttype  = 'sea'
-        print ('   * start filling the map.  type =',self.maptype,'.',nfill,'tiles out of',self.nsize)
+        #print ('   * start filling the map.  type =',self.maptype,'.',nfill,'tiles out of',self.nsize)
         self.make_cluster(ttype,'none',nfill,[ttype])
         self.fill_inverse_of_macro()
 
@@ -92,16 +92,16 @@ class Map:
                         self.tiles[x][y].ttype = 'sea'
                     elif self.maptype=='mediterranean':
                         self.tiles[x][y].ttype = 'plains'
-        print ('   * filled inverse',nfill,'tiles.')
+        #print ('   * filled inverse',nfill,'tiles.')
 
     def define_structures(self,struct):
-        print ('   * init ',self.structs[struct],struct)
+        #print ('   * init ',self.structs[struct],struct)
         if not (struct=='mountain' or struct=='desert'):
             return
         forbidden_types = ['sea', struct]
         for seed in range(self.structs[struct][0]):
             nfill = int(self.structs[struct][1]*self.nsize*rnd.random())
-            print ('   *** add',nfill,'tiles of',struct,'.')
+            #print ('   *** add',nfill,'tiles of',struct,'.')
             self.make_cluster(struct,'plains',nfill,forbidden_types)
 
     def make_cluster(self,struct,start_type,maxsize,forbidden_types=[]):
@@ -123,7 +123,7 @@ class Map:
         for x in range (self.ntiles[0]):
             for y in range (self.ntiles[1]):
                 tile = self.tiles[x][y]
-                print (tile.pos, tile.ttype)
+                #print (tile.pos, tile.ttype)
 
 
     def select_start_tile(self,accepted_types=['none']):
@@ -188,10 +188,9 @@ class Map:
     def draw_display(self):
         if self.display:
             self.display.draw_map()
-            time.sleep(DISPTIME)
 
 if __name__ == '__main__' :
-    print ("Testing map generation")
+    #print ("Testing map generation")
     synth_map = Map(MAPTYPE)
     if DISPLAY:
         synth_map.init_display(TDIM,MARGIN)
