@@ -27,7 +27,8 @@ class Tile:
         self.pos   = pos
         self.ttype = ttype
         self.population = None
-        self.food   = 0 
+        self.food   = 0
+        self.owner=-1
 
     def set_basics(self, pos = (0,0), ttype = 'none'):
         self.pos   = pos
@@ -40,7 +41,9 @@ class Tile:
         
     def set_food(self,food):
         self.food = food
-        
+
+    def set_owner(self,owner):
+        self.owner=owner
 class Map:
     def __init__(self, maptype='continent', ntiles=NTILES, structs=MAPSTRUCTS):
         print ('--------------------------------------------------------------------------------------------------------------')

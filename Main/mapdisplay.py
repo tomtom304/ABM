@@ -22,9 +22,13 @@ class MapDisplay:
     def draw_map(self):
         self.draw_tiles()
         self.draw_rivers()
+        #self.draw_borders()
         if self.display:
             pygame.display.flip()
 
+    def draw_borders(self):
+        
+    
     def draw_tiles(self):
         for x in range(len(self.tiles)):
             for y in range(len(self.tiles[x])):
@@ -34,6 +38,8 @@ class MapDisplay:
                 if self.display:
                     pygame.draw.rect(self.screen, self.display_colour(tile),
                                      pygame.Rect(xpos, ypos, self.xsize, self.ysize))
+                #if tile.owner!=-1:
+                    
                 
     def draw_rivers(self):        
         for river in self.rivers:
