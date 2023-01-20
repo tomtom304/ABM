@@ -1,11 +1,12 @@
 import pygame
 
 PLAINS      = (154, 205,  50)
-DESERT     = (255, 235, 205)
+DESERT     = (255, 215, 100)
 MOUNTAIN = (139,  69,  19)
 ALPINE        = (225,245,255)
 SEA            = ( 70, 130, 180)
 NOTHING   = (  0,   0,   0)
+colours=[(205,0,0),(0,128,0),(0,0,205),(0,100,100),(205,0,205),(0,0,0),(100,100,100),(250,150,0)]
 
 class MapDisplay:
     def __init__(self, fullmap,screen,tdim,margin):
@@ -26,7 +27,7 @@ class MapDisplay:
         if self.display:
             pygame.display.flip()
 
-    def draw_borders(self):
+    #def draw_borders(self):
         
     
     def draw_tiles(self):
@@ -38,7 +39,9 @@ class MapDisplay:
                 if self.display:
                     pygame.draw.rect(self.screen, self.display_colour(tile),
                                      pygame.Rect(xpos, ypos, self.xsize, self.ysize))
-                #if tile.owner!=-1:
+                if tile.owner!=-1:
+                    pygame.draw.rect(self.screen, colours[tile.owner],
+                                     pygame.Rect(xpos, ypos, self.xsize/2, self.ysize/2))
                     
                 
     def draw_rivers(self):        

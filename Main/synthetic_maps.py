@@ -21,6 +21,7 @@ MAPMACROS = {'continent': 1.5, 'mediterranean': 0.3}
 MAPSTRUCTS  = {'mountain':(5,0.1), 'desert':(2,0.1) }
 # relative probability for a river to originate at a tile
 PRIVER     = {'alpine':0.1, 'mountain': 0.02, 'plains': 0.002}
+CIVNO=8
 
 class Tile:
     def __init__(self, pos = (0,0), ttype = 'none'):
@@ -45,7 +46,7 @@ class Tile:
     def set_owner(self,owner):
         self.owner=owner
 class Map:
-    def __init__(self, maptype='continent', ntiles=NTILES, structs=MAPSTRUCTS):
+    def __init__(self, maptype='continent', ntiles=NTILES, structs=MAPSTRUCTS,n=CIVNO):
         print ('--------------------------------------------------------------------------------------------------------------')
         print ('Init map:',maptype,'on',ntiles,'tiles.')
         print ('--------------------------------------------------------------------------------------------------------------')
@@ -54,6 +55,7 @@ class Map:
         self.nsize     = self.ntiles[0]*self.ntiles[1]
         self.structs   = structs
         self.init_tiles_and_rivers()
+        self.tiles=self.generate(ntiles)
         self.define_macro_structure_of_map()
         for struct in self.structs:
             self.define_structures(struct)
@@ -63,17 +65,28 @@ class Map:
         print ('--------------------------------------------------------------------------------------------------------------')
         print ('Done.')
         print ('--------------------------------------------------------------------------------------------------------------')
-        
+
+       
     def init_tiles_and_rivers(self):
-        self.tiles      = []
-        for i in range(self.ntiles[0]):
-            ytiles = []
-            for j in range(self.ntiles[1]):
-                ytiles.append(Tile((i,j)))
-            self.tiles.append(ytiles)
+##        self.tiles      = []
+##        for i in range(self.ntiles[0]):
+##            ytiles = []
+##            for j in range(self.ntiles[1]):
+##                ytiles.append(Tile((i,j)))
+##            self.tiles.append(ytiles)
+
+        #self.tiles=np.empty( (self.ntiles[0],self.ntiles[1]), dtype=object)
+        #for x in range(self.ntiles[0]):
+        #    for y in range(self.ntiles[1]):
+        #        self.tiles[x,y]=Tile((x,y))    
         self.rivers    = []
 
-            
+    def generate(self, ntiles):
+        tiles=np.empty( (ntiles[0],ntiles[1]), dtype=object)
+        for x in range(self.ntiles[0]):
+            for y in range(self.ntiles[1]):
+                tiles[x,y]=Tile((x,y))    
+        return tiles      
     def define_macro_structure_of_map(self):
         nseeds = 1
         nfill      = int( self.nsize * (MAPMACROS[self.maptype]+rnd.random())/3)
@@ -114,7 +127,7 @@ class Map:
             if len(growth_sites)==0:
                 break
             position = rnd.choice(growth_sites)
-            self.tiles[position[0]][position[1]].ttype = struct
+            self.tiles[tuple(position)].ttype = struct
             self.add_tile_to_lists(growth_sites,position,forbidden_types)
             #print ('--- added',struct,'at',position," --> ",growth_sites)
             
@@ -135,7 +148,7 @@ class Map:
         else:
             while True:
                 start = [rnd.randint(1,self.ntiles[0]-2), rnd.randint(1,self.ntiles[1]-2)]
-                if self.tiles[start[0]][start[1]].ttype in accepted_types:
+                if self.tiles[tuple(start)].ttype in accepted_types:
                     break
         return start
 
@@ -182,6 +195,7 @@ class Map:
         river.meander(self)
         return river
 
+    
     def init_display(self,tdim,margin):
         pygame.init()
         pygame.display.set_caption('Synthetic Map Generation')

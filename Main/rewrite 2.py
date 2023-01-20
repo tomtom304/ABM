@@ -7,41 +7,41 @@ import time
 
 
 
-class tile():
-    def __init__(self,x,y):
-        self.terrain=plain
-        self.x,self.y=x,y
-        self.river=""
-        self.neighbours=[]
-        for i in (-1,0,1):
-            for j in (-1,0,1):
-                if abs(i+j)==1 and -1<x+i and x+i<NTILES[0] and y+j>-1 and y+j<NTILES[1]:
-                    self.neighbours.append([x+i,y+j])
-        self.neighbours=np.array(self.neighbours)
-        self.owner=-1
-        self.pop=0
-class world():
-    def __init__(self,NTILES):
-        self.tiles=self.generate(NTILES)
-    def generate(self, NTILES):
-        tiles=np.empty( (NTILES[0],NTILES[1]), dtype=object)
-        for x in range(NTILES[0]):
-            for y in range(NTILES[1]):
-                tiles[x,y]=tile(x,y)
-        return tiles
+##class tile():
+##    def __init__(self,x,y):
+##        self.terrain=plain
+##        self.x,self.y=x,y
+##        self.river=""
+##        self.neighbours=[]
+##        for i in (-1,0,1):
+##            for j in (-1,0,1):
+##                if abs(i+j)==1 and -1<x+i and x+i<ntiles[0] and y+j>-1 and y+j<ntiles[1]:
+##                    self.neighbours.append([x+i,y+j])
+##        self.neighbours=np.array(self.neighbours)
+##        self.owner=-1
+##        self.pop=0
+##class world():
+##    def __init__(self,ntiles):
+##        self.tiles=self.generate(ntiles)
+##    def generate(self, ntiles):
+##        tiles=np.empty( (ntiles[0],ntiles[1]), dtype=object)
+##        for x in range(ntiles[0]):
+##            for y in range(ntiles[1]):
+##                tiles[x,y]=tile(x,y)
+##        return tiles
 
 class map():
     def __init__(self,maptype,ntiles):
         self.smap          = self.init_map()
     
     def init_map(self):
-        return smaps.Map(MAPTYPE,NTILES)
+        return smaps.Map(maptype,ntiles)
             
 ##    def init_pops(self):
 ##        pass
 
-    def init_display(self,tdim,margin):
-        self.smap.init_display(tdim,margin)
+    def init_display(self,tilesize,margin):
+        self.smap.init_display(tilesize,margin)
 
     def draw(self):
         self.smap.draw_display()
@@ -49,24 +49,24 @@ class map():
 class civ():
     def __init__(self,no):
         self.no=no
-        self.x=randint(0,NTILES[0]-1)
-        self.y=randint(0,NTILES[1]-1)
-        while world.tiles[self.x,self.y].owner!=-1:
-            self.x=randint(0,NTILES[0]-1)
-            self.y=randint(0,NTILES[1]-1)
-        world.tiles[self.x,self.y].owner=self.no
-        world.tiles[self.x,self.y].pop=100
+        self.x=randint(0,ntiles[0]-1)
+        self.y=randint(0,ntiles[1]-1)
+        while world.smap.tiles[self.x,self.y].owner!=-1 or world.smap.tiles[self.x,self.y].ttype=="sea":
+            self.x=randint(0,ntiles[0]-1)
+            self.y=randint(0,ntiles[1]-1)
+        world.smap.tiles[self.x,self.y].owner=self.no
+        world.smap.tiles[self.x,self.y].population=100
         self.edgesquares=[[self.x,self.y]]
         self.squares=[[self.x,self.y]]
     def tick(self):
         for square in self.squares:
-            tile=world.tiles[tuple(square)]
+            tile=world.smap.tiles[tuple(square)]
             tile.pop*=popgrowth
             if tile.pop>tile.terrain["food"]:
                 if square in self.edgesquares:
                     self.expand(tile)
                 else:
-                    new=world.tiles[tuple(choice(tile.neighbours))]
+                    new=world.smap.tiles[tuple(choice(tile.neighbours))]
                     new.pop+=10
                     tile.pop-=10
 ##    def combat(self,targetagent,targetsquare,terrain):
@@ -94,7 +94,7 @@ class civ():
 ##                if len(self.edgesquares)==0:
 ##                    surrounded=False
 ##                    new=1
-        targets=[world.tiles[tuple(newsquare)] for newsquare in target.neighbours if not any((newsquare == x).all() for x in self.squares)]
+        targets=[world.smap.tiles[tuple(newsquare)] for newsquare in target.neighbours if not any((newsquare == x).all() for x in self.squares)]
         if len(targets)==0:
             self.edgesquares.remove([target.x,target.y])
         else:
@@ -106,41 +106,43 @@ class civ():
 ##                    self.gainsquare(x,y,newsquare)
 ##                    targetagent.losesquare(self,x,y,newsquare)
 
-NTILES   = (80, 80)
-TDIM      = (10, 10)
-MARGIN  = 1
-MAPTYPE = 'mediterranean'
+ntiles   = (20, 10)
+tilesize      = (80, 80)
+margin  = 10
+maptype = 'continent'
 
 popgrowth=1.05
 plain={"food":100,"defence":1,"move":1}
 desert={"food":10,"defence":2,"move":1}
 mountain={"food":20,"defence":3,"move":2}
    
-n=10
+n=8
+
+world = map(maptype,ntiles)
+world.init_display(tilesize,margin)
 ##fig,ax=plt.subplots(2)
-##ax[0].set_ylim(0,NTILES[1], auto=False)
-##ax[0].set_xlim(0,NTILES[0], auto=False)
+##ax[0].set_ylim(0,ntiles[1], auto=False)
+##ax[0].set_xlim(0,ntiles[0], auto=False)
 ##fig.set_size_inches(5.25, 6.75)
 ##fig.set_tight_layout(True)
 ##fig.set_dpi(125)
-world = world(NTILES)
+##world = world(ntiles)
 agents=[]
 for i in range(n):    
     a=civ(i)
     agents.append(a)
     #ax[0].scatter([i[0] for i in a.squares],[i[1] for i in a.squares],marker="s",s=16)
-#ax[1].set_ylim(0,NTILES[0]*NTILES[1], auto=True)
+#ax[1].set_ylim(0,ntiles[0]*ntiles[1], auto=True)
 
-dryrun = map(MAPTYPE,NTILES)
-dryrun.init_display(TDIM,MARGIN)
-dryrun.draw()
+
+world.draw()
 
 
 #while True:
 ##    print("tick")
 ##    ax[0].clear()
-##    ax[0].set_ylim(-1,NTILES[1], auto=False)
-##    ax[0].set_xlim(-1,NTILES[0], auto=False)
+##    ax[0].set_ylim(-1,ntiles[1], auto=False)
+##    ax[0].set_xlim(-1,ntiles[0], auto=False)
 ##    for a in agents:
 ##        a.tick()
 ##        ax[0].scatter([i[0] for i in a.squares],[i[1] for i in a.squares],marker="s",s=16)
