@@ -106,9 +106,9 @@ class civ():
 ##                    self.gainsquare(x,y,newsquare)
 ##                    targetagent.losesquare(self,x,y,newsquare)
 
-ntiles   = (20, 10)
-tilesize      = (80, 80)
-margin  = 10
+ntiles   = (200, 100)
+tilesize      = (8, 8)
+margin  = 1
 maptype = 'continent'
 
 popgrowth=1.05
