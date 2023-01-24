@@ -21,6 +21,7 @@ class MapDisplay:
         self.ysize   = self.tdim[1]-2*self.margin
 
     def draw_map(self):
+        self.screen.fill((0,0,0))
         self.draw_tiles()
         self.draw_rivers()
         #self.draw_borders()

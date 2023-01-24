@@ -22,23 +22,27 @@ MAPSTRUCTS  = {'mountain':(5,0.1), 'desert':(2,0.1) }
 # relative probability for a river to originate at a tile
 PRIVER     = {'alpine':0.1, 'mountain': 0.02, 'plains': 0.002}
 CIVNO=8
+food={"plain":1000,"desert":200,"mountain":100,"alpine":0,"sea":0}
+defence={"plain":1,"desert":2,"mountain":3}
+move={"plain":1,"desert":1,"mountain":2,"sea":3}
+
 
 class Tile:
     def __init__(self, pos = (0,0), ttype = 'none'):
         self.pos   = pos
         self.ttype = ttype
-        self.population = None
+        self.pop = 0
         self.food   = 0
         self.owner=-1
-
+        self.neighbours=[]
     def set_basics(self, pos = (0,0), ttype = 'none'):
         self.pos   = pos
         self.ttype = ttype
-        self.population = None
+        self.pop = 0
         self.food = 0
         
     def set_population(self,pop):
-        self.population = pop
+        self.pop = pop
         
     def set_food(self,food):
         self.food = food
@@ -203,6 +207,7 @@ class Map:
         self.display = display.MapDisplay(self,screen,tdim,margin)
 
     def draw_display(self):
+        
         if self.display:
             self.display.draw_map()
 
