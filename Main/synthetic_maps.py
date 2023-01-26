@@ -6,9 +6,9 @@ import mapdisplay as display
 import rivers  as rivers
 
 # dimensions of map in tiles
-NTILES   = (30, 20)
-TDIM      = (10, 10)
-MARGIN  = 2
+#NTILES   = (30, 20)
+#TDIM      = (10, 10)
+#MARGIN  = 2
 # display for executable test?
 DISPLAY = True
 DISPTIME = 100
@@ -49,8 +49,30 @@ class Tile:
 
     def set_owner(self,owner):
         self.owner=owner
+
+    def findneighbours(self,travel,size,distances):
+        unvisited=[]
+        for i in range(min(self.pos[0]-travel,0),max(self.pos[0]+travel,size[0])+1):
+            for j in range(min(self.pos[1]-travel,0),max(self.pos[1]+travel,size[1])+1):
+                unvisited+=(i,j)
+        shortest={}
+        for node in unvisited:
+            shortest[node]=size[0]*size[1]
+        current=self.pos
+        while unvisited!=[]:
+            ########
+            for i in range(min(current[0]-1,0),max(current[0]+1,size[0])+1):
+                for j in range(min(current[1]-1,0),max(self.pos[1]+1,size[1])+1):
+                    new=shortest[current]+distances[i,j]
+                    if new<shortest[i,j]:
+                        shortest[i,j]=new
+            unvisited.remove((i,j))
+
+
+                    
+            for node in unvisited:
 class Map:
-    def __init__(self, maptype='continent', ntiles=NTILES, structs=MAPSTRUCTS,n=CIVNO):
+    def __init__(self, ntiles, maptype='continent',n=CIVNO, structs=MAPSTRUCTS):
         print ('--------------------------------------------------------------------------------------------------------------')
         print ('Init map:',maptype,'on',ntiles,'tiles.')
         print ('--------------------------------------------------------------------------------------------------------------')
@@ -59,7 +81,7 @@ class Map:
         self.nsize     = self.ntiles[0]*self.ntiles[1]
         self.structs   = structs
         self.init_tiles_and_rivers()
-        self.tiles=self.generate(ntiles)
+        self.tiles=self.generate()
         self.define_macro_structure_of_map()
         for struct in self.structs:
             self.define_structures(struct)
@@ -85,11 +107,11 @@ class Map:
         #        self.tiles[x,y]=Tile((x,y))    
         self.rivers    = []
 
-    def generate(self, ntiles):
-        tiles=np.empty( (ntiles[0],ntiles[1]), dtype=object)
+    def generate(self):
+        tiles=np.empty( (self.ntiles[0],self.ntiles[1]), dtype=object)
         for x in range(self.ntiles[0]):
             for y in range(self.ntiles[1]):
-                tiles[x,y]=Tile((x,y))    
+                tiles[x,y]=Tile((x,y))
         return tiles      
     def define_macro_structure_of_map(self):
         nseeds = 1

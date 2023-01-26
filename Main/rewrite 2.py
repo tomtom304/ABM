@@ -35,7 +35,7 @@ class map():
         self.smap          = self.init_map()
     
     def init_map(self):
-        return smaps.Map(maptype,ntiles)
+        return smaps.Map(ntiles,maptype,n)
             
 ##    def init_pops(self):
 ##        pass
@@ -54,26 +54,32 @@ class civ():
         while world.smap.tiles[self.x,self.y].owner!=-1 or world.smap.tiles[self.x,self.y].ttype in ["sea","alpine"]:
             self.x=randint(0,ntiles[0]-1)
             self.y=randint(0,ntiles[1]-1)
-        world.smap.tiles[self.x,self.y].owner=self.no
-        world.smap.tiles[self.x,self.y].population=100
-        self.squares=[[self.x,self.y]]
+        tile=world.smap.tiles[self.x,self.y]
+        tile.owner=self.no
+        tile.set_population(100)
+        self.squares=[tile.pos]
         self.travel=3
     def tick(self):
         for square in self.squares:
-            tile=world.smap.tiles[tuple(square)]
-            tile.pop*=popgrowth
-            if tile.pop>tile.ttype["food"]:
+            print(square)
+            tile=world.smap.tiles[square]
+            print(tile.pop,tile.owner)
+            tile.set_population(tile.pop*popgrowth)
+            if tile.pop>food[tile.ttype]:
+                
+                print("starve")
                 new=world.smap.tiles[tuple(choice(tile.neighbours))]
                 if new.owner != self.no and new.ttype not in ["alpine","sea"]:
                     self.gainsquare(new)
-                moving = (tile.pop-tile.ttype["food"])*(1+random())
+                    print("Grow")
+                moving = (tile.pop-food[tile.ttype])*(1+random())
                 new.pop+=moving
                 tile.pop-=moving
 ##    def combat(self,targetagent,targetsquare,terrain):
 ##        return self.c.combat2(self,targetagent,targetsquare)
     def gainsquare(self,target):
         target.owner=self.no
-        self.squares+=[[target.x,target.y]]
+        self.squares+=[new.pos]
 ##    def losesquare(self,a,x,y,square):
 ##        self.edgesquares=self.edgesquares[self.edgesquares!=[x,y]]
 ##        self.squares=self.squares[self.squares!=[x,y]]
@@ -87,8 +93,10 @@ tilesize      = (8, 8)
 margin  = 1
 maptype = 'continent'
 
-popgrowth=1.05
-
+popgrowth=2
+food={"plains":1000,"desert":200,"mountain":100,"alpine":0,"sea":0}
+defence={"plains":1,"desert":2,"mountain":3}
+move={"plains":1,"desert":1,"mountain":2,"sea":3}
    
 n=8
 
@@ -104,7 +112,6 @@ while True:
     for a in agents:
         a.tick()
     world.draw()
-    print("tick")
 print("fin")
 
 
