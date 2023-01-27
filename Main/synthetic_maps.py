@@ -58,19 +58,21 @@ class Tile:
         shortest={}
         for node in unvisited:
             shortest[node]=size[0]*size[1]
-        current=self.pos
+        shortest[self.pos]=0
         while unvisited!=[]:
-            ########
-            for i in range(min(current[0]-1,0),max(current[0]+1,size[0])+1):
-                for j in range(min(current[1]-1,0),max(self.pos[1]+1,size[1])+1):
-                    new=shortest[current]+distances[i,j]
-                    if new<shortest[i,j]:
-                        shortest[i,j]=new
-            unvisited.remove((i,j))
+            current=min(shortest,key=shortest.get)
+            if shortest[current]>travel:
+                unvisited=[]
+            else:
+                for i in range(min(current[0]-1,0),max(current[0]+1,size[0])+1):
+                    for j in range(min(current[1]-1,0),max(current[1]+1,size[1])+1):
+                        new=shortest[current]+distances[i,j]
+                        if new<shortest[i,j]:
+                            shortest[i,j]=new
+                unvisited.remove((i,j))
 
 
                     
-            for node in unvisited:
 class Map:
     def __init__(self, ntiles, maptype='continent',n=CIVNO, structs=MAPSTRUCTS):
         print ('--------------------------------------------------------------------------------------------------------------')
