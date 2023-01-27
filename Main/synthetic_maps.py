@@ -51,27 +51,31 @@ class Tile:
         self.owner=owner
 
     def findneighbours(self,travel,size,distances):
-        unvisited=[]
-        for i in range(min(self.pos[0]-travel,0),max(self.pos[0]+travel,size[0])+1):
-            for j in range(min(self.pos[1]-travel,0),max(self.pos[1]+travel,size[1])+1):
-                unvisited+=(i,j)
         shortest={}
-        for node in unvisited:
-            shortest[node]=size[0]*size[1]
-        shortest[self.pos]=0
-        while unvisited!=[]:
-            current=min(shortest,key=shortest.get)
-            if shortest[current]>travel:
-                unvisited=[]
+        neighbours=[]
+        for i in range(max(self.pos[0]-travel,0),min(self.pos[0]+travel,size[0])):
+            for j in range(max(self.pos[1]-travel,0),min(self.pos[1]+travel,size[1])):
+                shortest[(i,j)]=[size[0]*size[1],False]
+        shortest[self.pos][0]=0
+        running=True
+        while running:
+            shortestdist=min([v[0] for v in shortest.values() if not v[1]])
+            current=[k for k,v in shortest.items() if v[0]==shortestdist and not v[1]][0]
+            if shortest[current][0]>=travel:
+                running=False
             else:
-                for i in range(min(current[0]-1,0),max(current[0]+1,size[0])+1):
-                    for j in range(min(current[1]-1,0),max(current[1]+1,size[1])+1):
-                        new=shortest[current]+distances[i,j]
-                        if new<shortest[i,j]:
-                            shortest[i,j]=new
-                unvisited.remove((i,j))
-
-
+                for i in (-1,0,1):
+                    for j in (-1,0,1):
+                        if abs(i+j)==1 and -1<current[0]+i and current[0]+i<size[0] and current[1]+j>-1 and current[1]+j<size[1]:
+                            x,y=current[0]+i,current[1]+j
+                            new=shortest[current][0]+distances[x,y]
+                            if new<shortest[(x,y)][0]:
+                                shortest[x,y][0]=new
+                shortest[current][1]=True
+                if len([1 for v in shortest.values() if not v[1]])==0:
+                    running=False
+            
+        return {k:v[0] for k,v in shortest.items() if v[0]<=travel}
                     
 class Map:
     def __init__(self, ntiles, maptype='continent',n=CIVNO, structs=MAPSTRUCTS):
