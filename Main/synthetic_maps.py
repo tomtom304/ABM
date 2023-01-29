@@ -22,9 +22,9 @@ MAPSTRUCTS  = {'mountain':(5,0.1), 'desert':(2,0.1) }
 # relative probability for a river to originate at a tile
 PRIVER     = {'alpine':0.1, 'mountain': 0.02, 'plains': 0.002}
 CIVNO=8
-food={"plain":1000,"desert":200,"mountain":100,"alpine":0,"sea":0}
-defence={"plain":1,"desert":2,"mountain":3}
-move={"plain":1,"desert":1,"mountain":2,"sea":3}
+food={"plains":1000,"desert":200,"mountain":100,"alpine":0,"sea":0}
+defence={"plains":1,"desert":2,"mountain":3}
+move={"plains":1,"desert":1,"mountain":2,"sea":3,"alpine":100}
 
 
 class Tile:
@@ -35,6 +35,8 @@ class Tile:
         self.food   = 0
         self.owner=-1
         self.neighbours=[]
+        self.surrounded=False
+        self.full=False
     def set_basics(self, pos = (0,0), ttype = 'none'):
         self.pos   = pos
         self.ttype = ttype
@@ -50,11 +52,11 @@ class Tile:
     def set_owner(self,owner):
         self.owner=owner
 
-    def findneighbours(self,travel,size,distances):
+    def findneighbours(self,travel,size,world):
         shortest={}
         neighbours=[]
-        for i in range(max(self.pos[0]-travel,0),min(self.pos[0]+travel,size[0])):
-            for j in range(max(self.pos[1]-travel,0),min(self.pos[1]+travel,size[1])):
+        for i in range(max(self.pos[0]-travel-1,0),min(self.pos[0]+travel+1,size[0])):
+            for j in range(max(self.pos[1]-travel-1,0),min(self.pos[1]+travel+1,size[1])):
                 shortest[(i,j)]=[size[0]*size[1],False]
         shortest[self.pos][0]=0
         running=True
@@ -68,7 +70,7 @@ class Tile:
                     for j in (-1,0,1):
                         if abs(i+j)==1 and -1<current[0]+i and current[0]+i<size[0] and current[1]+j>-1 and current[1]+j<size[1]:
                             x,y=current[0]+i,current[1]+j
-                            new=shortest[current][0]+distances[x,y]
+                            new=shortest[current][0]+move[world.tiles[x,y].ttype]
                             if new<shortest[(x,y)][0]:
                                 shortest[x,y][0]=new
                 shortest[current][1]=True
