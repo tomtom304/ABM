@@ -50,14 +50,15 @@ class civ():
                         
                         new=world.smap.tiles[choice(targets)]
                         if new.ttype not in ["alpine","sea"]:
-                            if new.owner!=-1:
-                                pass
+                            #if new.owner!=-1:
+                                #pass
                                 ##combat##
-                            else:
-                                self.gainsquare(new)
-                                moving = (tile.pop-food[tile.ttype])*(1+random())
-                                new.pop+=moving
-                                tile.pop-=moving
+                            #else:
+                            self.gainsquare(new)
+                            #moving = (tile.pop-food[tile.ttype])
+                            moving=10
+                            new.pop+=moving
+                            tile.pop-=moving
                         else:
                             tile.pop==food[tile.ttype]
 ##    def combat(self,targetagent,targetsquare,terrain):
@@ -79,7 +80,7 @@ tilesize      = (8, 8)
 margin  = 1
 maptype = 'continent'
 
-popgrowth=1.05
+popgrowth=1.02
 food={"plains":1000,"desert":200,"mountain":100,"alpine":0,"sea":0}
 defence={"plains":1,"desert":2,"mountain":3}
 move={"plains":1,"desert":1,"mountain":2,"sea":3}
@@ -94,7 +95,7 @@ for i in range(n):
     agents.append(a)
 world.draw()
 while True:
-    
+    print("tick")
     for a in agents:
         a.tick()
     world.draw()
