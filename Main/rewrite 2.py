@@ -34,7 +34,7 @@ class civ():
         tile.owner=self.no
         tile.set_population(100)
         self.squares=[tile.pos]
-        self.travel=3
+        self.travel=6
         tile.neighbours=tile.findneighbours(self.travel,ntiles,world.smap)
     def tick(self):
         for square in self.squares:
@@ -42,37 +42,34 @@ class civ():
             if not tile.surrounded:
                 tile.set_population(tile.pop*popgrowth)
                 if tile.pop>food[tile.ttype]:
-                    tile.full=True
-                    targets=[tuple([k,v]) for k,v in tile.neighbours if world.smap.tiles[tuple([k,v])].owner!=self.no or not world.smap.tiles[tuple([k,v])].full]
+                    targets=[tuple([k,v]) for k,v in tile.neighbours if world.smap.tiles[tuple([k,v])].owner!=self.no and world.smap.tiles[tuple([k,v])].ttype not in ["alpine","sea"]]
                     if len(targets)==0:
                         tile.surrounded=True
+                        tile.pop==food[tile.ttype]
                     else:
-                        
                         new=world.smap.tiles[choice(targets)]
-                        if new.ttype not in ["alpine","sea"]:
                             #if new.owner!=-1:
                                 #pass
                                 ##combat##
                             #else:
-                            self.gainsquare(new)
+                        self.gainsquare(new)
                             #moving = (tile.pop-food[tile.ttype])
-                            moving=10
-                            new.pop+=moving
-                            tile.pop-=moving
-                        else:
-                            tile.pop==food[tile.ttype]
+                        moving=10
+                        new.pop+=moving
+                        tile.pop-=moving
 ##    def combat(self,targetagent,targetsquare,terrain):
 ##        return self.c.combat2(self,targetagent,targetsquare)
     def gainsquare(self,target):
+        if target.owner!=-1:
+            targetagent=agents[target.owner]
+            targetagent.squares=[pos for pos in targetagent.squares if pos!=target.pos]
+            if targetagent.travel!=self.travel:
+                target.neighbours=target.findneighbours(self.travel,ntiles,world.smap)
+        else:
+            target.neighbours=target.findneighbours(self.travel,ntiles,world.smap)
         target.owner=self.no
         self.squares+=[target.pos]
-        target.neighbours=target.findneighbours(self.travel,ntiles,world.smap)
-##    def losesquare(self,a,x,y,square):
-##        self.edgesquares=self.edgesquares[self.edgesquares!=[x,y]]
-##        self.squares=self.squares[self.squares!=[x,y]]
-##        for i in world.tiles[x,y].neighbours:
-##            if i not in self.edgesquares and i in self.squares:
-##                    self.edgesquares+=[[x,y]]
+        
 
 
 ntiles   = (200, 100)
@@ -80,7 +77,7 @@ tilesize      = (8, 8)
 margin  = 1
 maptype = 'continent'
 
-popgrowth=1.02
+popgrowth=1.05
 food={"plains":1000,"desert":200,"mountain":100,"alpine":0,"sea":0}
 defence={"plains":1,"desert":2,"mountain":3}
 move={"plains":1,"desert":1,"mountain":2,"sea":3}
@@ -95,7 +92,6 @@ for i in range(n):
     agents.append(a)
 world.draw()
 while True:
-    print("tick")
     for a in agents:
         a.tick()
     world.draw()

@@ -88,7 +88,7 @@ class Map:
         self.ntiles    = ntiles
         self.nsize     = self.ntiles[0]*self.ntiles[1]
         self.structs   = structs
-        self.init_tiles_and_rivers()
+        self.rivers    = []
         self.tiles=self.generate()
         self.define_macro_structure_of_map()
         for struct in self.structs:
@@ -100,20 +100,6 @@ class Map:
         print ('Done.')
         print ('--------------------------------------------------------------------------------------------------------------')
 
-       
-    def init_tiles_and_rivers(self):
-##        self.tiles      = []
-##        for i in range(self.ntiles[0]):
-##            ytiles = []
-##            for j in range(self.ntiles[1]):
-##                ytiles.append(Tile((i,j)))
-##            self.tiles.append(ytiles)
-
-        #self.tiles=np.empty( (self.ntiles[0],self.ntiles[1]), dtype=object)
-        #for x in range(self.ntiles[0]):
-        #    for y in range(self.ntiles[1]):
-        #        self.tiles[x,y]=Tile((x,y))    
-        self.rivers    = []
 
     def generate(self):
         tiles=np.empty( (self.ntiles[0],self.ntiles[1]), dtype=object)
@@ -170,9 +156,10 @@ class Map:
         return pos[0]>=0 and pos[0]<self.ntiles[0] and pos[1]>=0 and pos[1]<self.ntiles[1]
 
     def print_tiles(self):
-        for x in range (self.ntiles[0]):
-            for y in range (self.ntiles[1]):
-                tile = self.tiles[x][y]
+        pass
+        #for x in range (self.ntiles[0]):
+            #for y in range (self.ntiles[1]):
+                #tile = self.tiles[x][y]
                 #print (tile.pos, tile.ttype)
 
 
@@ -227,6 +214,11 @@ class Map:
     def make_river(self,rid,pos):
         river = rivers.River(rid,pos,self)
         river.meander(self)
+        for pos in river.links:
+            for i in range(4):
+                
+                if self.tiles[(pos[0]-(i//2),pos[1]-(i%2))].ttype=="desert":
+                    self.tiles[(pos[0]-(i//2),pos[1]-(i%2))].ttype="plains"
         return river
 
     
