@@ -23,7 +23,6 @@ MAPSTRUCTS  = {'mountain':(5,0.1), 'desert':(2,0.1) }
 PRIVER     = {'alpine':0.1, 'mountain': 0.02, 'plains': 0.002}
 CIVNO=8
 food={"plains":1000,"desert":200,"mountain":100,"alpine":0,"sea":0}
-defence={"plains":1,"desert":2,"mountain":3}
 move={"plains":1,"desert":1,"mountain":2,"sea":3,"alpine":100}
 
 
