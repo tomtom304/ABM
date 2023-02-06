@@ -35,7 +35,7 @@ class civ():
         tile.owner=self.no
         tile.set_population(100)
         self.squares=[tile.pos]
-        self.travel=2
+        self.travel=5
         tile.neighbours=tile.findneighbours(self.travel,ntiles,world.smap)
     def tick(self):
         for square in self.squares:

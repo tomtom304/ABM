@@ -23,7 +23,7 @@ MAPSTRUCTS  = {'mountain':(5,0.1), 'desert':(2,0.1) }
 PRIVER     = {'alpine':0.1, 'mountain': 0.02, 'plains': 0.002}
 CIVNO=8
 food={"plains":1000,"desert":200,"mountain":100,"alpine":0,"sea":0}
-move={"plains":1,"desert":1,"mountain":2,"sea":3,"alpine":100}
+move={"plains":1,"desert":1,"mountain":2,"sea":3,"alpine":5}
 
 
 class Tile:
@@ -191,8 +191,8 @@ class Map:
             for y in range (self.ntiles[1]):
                 if self.tiles[x][y].ttype == 'mountain':
                     is_alpine = True
-                    for dx in range (-2,3):
-                        for dy in range (-2,3):
+                    for dx in range (-5,6):
+                        for dy in range (-5,6):
                             if (self.check_pos([x+dx,y+dy]) and
                                 not(self.tiles[x+dx][y+dy].ttype == 'mountain' or self.tiles[x+dx][y+dy].ttype == 'alpine')):
                                 is_alpine = False
