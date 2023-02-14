@@ -1,12 +1,12 @@
 import pygame
-
+import random
 PLAINS      = (154, 205,  50)
 DESERT     = (255, 215, 100)
 MOUNTAIN = (139,  69,  19)
 ALPINE        = (225,245,255)
 SEA            = ( 70, 130, 180)
 NOTHING   = (  0,   0,   0)
-colours=[(150,0,0),(0,150,0),(0,0,150),(0,130,130),(130,0,130),(0,0,0),(130,130,130),(130,80,0)]
+
 
 class MapDisplay:
     def __init__(self, fullmap,screen,tdim,margin):
@@ -19,7 +19,9 @@ class MapDisplay:
         self.margin  = margin
         self.xsize   = self.tdim[0]-2*self.margin
         self.ysize   = self.tdim[1]-2*self.margin
-
+        self.colours=[]
+        for i in range(self.ntiles[0]*self.ntiles[1]):
+            self.colours.append((random.randint(0,255),random.randint(0,255),random.randint(0,255)))
     def draw_map(self):
         self.screen.fill((0,0,0))
         self.draw_tiles()
@@ -41,8 +43,11 @@ class MapDisplay:
                     pygame.draw.rect(self.screen, self.display_colour(tile),
                                      pygame.Rect(xpos, ypos, self.xsize, self.ysize))
                 if tile.owner!=-1:
-                    pygame.draw.rect(self.screen, colours[tile.owner],
+                    pygame.draw.rect(self.screen, self.colours[tile.owner],
                                      pygame.Rect(xpos, ypos, self.xsize/2, self.ysize/2))
+                if tile.town:
+                    pygame.draw.rect(self.screen, "black",
+                                     pygame.Rect(xpos+self.xsize/2, ypos, self.xsize/2, self.ysize/2))
                     
                 
     def draw_rivers(self):        

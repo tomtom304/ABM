@@ -12,11 +12,11 @@ import rivers  as rivers
 # display for executable test?
 DISPLAY = True
 DISPTIME = 100
-# type of map: 'continent' or 'mediterranean'
-MAPTYPE = 'continent' #'mediterranean'
+# type of map: 'continent' or "med"
+MAPTYPE = 'continent' #"med"
 # minimal proportion p_min of defining structure of the map: overall proportion is p = (p_min+ran)/3,
 # where ran is a random number
-MAPMACROS = {'continent': 1.5, 'mediterranean': 0.3}
+MAPMACROS = {'continent': 1.5, "med": 0.3}
 # number of structures and relative sizes
 MAPSTRUCTS  = {'mountain':(5,0.1), 'desert':(2,0.1) }
 # relative probability for a river to originate at a tile
@@ -35,7 +35,7 @@ class Tile:
         self.owner=-1
         self.neighbours=[]
         self.surrounded=False
-        self.full=False
+        self.town=False
     def set_basics(self, pos = (0,0), ttype = 'none'):
         self.pos   = pos
         self.ttype = ttype
@@ -111,7 +111,7 @@ class Map:
         nfill      = int( self.nsize * (MAPMACROS[self.maptype]+rnd.random())/3)
         if self.maptype=='continent':
             ttype  = 'plains'
-        elif self.maptype=='mediterranean':
+        elif self.maptype=="med":
             ttype  = 'sea'
         #print ('   * start filling the map.  type =',self.maptype,'.',nfill,'tiles out of',self.nsize)
         self.make_cluster(ttype,'none',nfill,[ttype])
@@ -125,7 +125,7 @@ class Map:
                     nfill += 1
                     if self.maptype=='continent':
                         self.tiles[x][y].ttype = 'sea'
-                    elif self.maptype=='mediterranean':
+                    elif self.maptype=="med":
                         self.tiles[x][y].ttype = 'plains'
         #print ('   * filled inverse',nfill,'tiles.')
 
