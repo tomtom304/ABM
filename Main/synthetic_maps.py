@@ -23,7 +23,7 @@ MAPSTRUCTS  = {'mountain':(5,0.1), 'desert':(2,0.1) }
 PRIVER     = {'alpine':0.1, 'mountain': 0.02, 'plains': 0.002}
 CIVNO=8
 food={"plains":1000,"desert":200,"mountain":100,"alpine":0,"sea":0}
-move={"plains":1,"desert":1,"mountain":2,"sea":3,"alpine":5}
+move={"plains":2,"desert":2,"mountain":3,"sea":4,"alpine":100}
 
 
 class Tile:
@@ -36,11 +36,12 @@ class Tile:
         self.neighbours=[]
         self.surrounded=False
         self.town=False
+        self.coastal=False
     def set_basics(self, pos = (0,0), ttype = 'none'):
         self.pos   = pos
         self.ttype = ttype
         self.pop = 0
-        self.food = 0
+        self.food = food[self.ttype]
         
     def set_population(self,pop):
         self.pop = pop
@@ -69,7 +70,10 @@ class Tile:
                     for j in (-1,0,1):
                         if abs(i+j)==1 and -1<current[0]+i and current[0]+i<size[0] and current[1]+j>-1 and current[1]+j<size[1]:
                             x,y=current[0]+i,current[1]+j
-                            new=shortest[current][0]+move[world.tiles[x,y].ttype]
+                            if world.tiles[x,y].coastal:
+                                new=shortest[current][0]+1
+                            else:
+                                new=shortest[current][0]+move[world.tiles[x,y].ttype]
                             if new<shortest[(x,y)][0]:
                                 shortest[x,y][0]=new
                 shortest[current][1]=True
@@ -215,9 +219,11 @@ class Map:
         river.meander(self)
         for pos in river.links:
             for i in range(4):
-                
-                if self.tiles[(pos[0]-(i//2),pos[1]-(i%2))].ttype=="desert":
-                    self.tiles[(pos[0]-(i//2),pos[1]-(i%2))].ttype="plains"
+                current=self.tiles[(pos[0]-(i//2),pos[1]-(i%2))]
+                current.coastal=True
+                if current.ttype=="desert":
+                    current.ttype="plains"
+                current.food=food[current.ttype]*1.5
         return river
 
     

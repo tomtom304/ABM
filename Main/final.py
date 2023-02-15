@@ -31,12 +31,12 @@ class civ():
         self.y=y
         tile=world.smap.tiles[self.x,self.y]
         tile.owner=self.no
-        tile.set_population(30+40*random())
+        tile.set_population(40*random())
         self.squares=[tile.pos]
-        self.travel=5
+        self.travel=8
         tile.neighbours=tile.findneighbours(self.travel,ntiles,world.smap)
-        self.tech={"agri":1,"combat":1}
         self.towntithe=0
+        self.town=False
     def tilefull(self,tile,moving):
         emptytarget,selftarget,target=[],[],[]
         for pos in tile.neighbours:
@@ -63,22 +63,25 @@ class civ():
             self.combat(new)
         else:
             tile.surrounded=True
-    def checktech(self,full):
-        if full>2:
-            hometerrain=world.smap.tiles[(self.x,self.y)].ttype
-            if hometerrain=="desert":
-                self.travel=8
-            elif hometerrain=="mountain":
-                self.tech["combat"]=2
-            elif hometerrain=="plains":
-                self.tech["agri"]=2
-        #if full>4:
-            #world.smap.tiles[(self.x,self.y)].town=True
+    def tilefulldumb(self,tile,moving):
+        if len(tile.neighbours)!=0:
+            new=world.smap.tiles[choice([pos for pos in tile.neighbours.keys() if world.smap.tiles[pos].ttype not in ["sea","alpine"]])]
+            if new.owner==-1:
+                self.gainsquare(new)
+                new.pop+=moving
+                tile.pop-=moving
+            elif new.owner==self.no and new.pop<new.food:
+                new.pop+=moving
+                tile.pop-=moving
+            elif new.owner!=self.no:
+                self.combat(new)
+        else:
+            tile.surrounded=True
     def tick(self):
         full=0
         for square in self.squares:
             tile=world.smap.tiles[square]
-            tile.food=food[tile.ttype]*self.tech["agri"]
+            
             if tile.pop<0:
                 tile.owner=-1
                 tile.pop=0
@@ -87,13 +90,17 @@ class civ():
                 tile.set_population(tile.pop*popgrowth)
                 if tile.town==True:
                     self.towntithe=(tile.pop-tile.food)/len(self.squares)
-                    if self.towntithe>20:
-                        self.tilefull(tile)
-                        tile.pop=tile.food+20*len(self.squares)
+                    if self.towntithe>50:
+                        self.tilefull(tile,tile.pop-tile.food+50*len(self.squares))
+                        tile.pop=tile.food+100*len(self.squares)
                 elif tile.pop>tile.food-self.towntithe:
-                    full+=1
-                    if world.smap.tiles[(self.x,self.y)].town==False:
-                        self.checktech(full)
+                    if not self.town:
+                        full+=1
+                        if full>4:
+                            sites=[world.smap.tiles[pos] for pos in self.squares if world.smap.tiles[pos].coastal]
+                            if sites:
+                                #choice(sites).town=True
+                                self.town=True
                     self.tilefull(tile,tile.pop-tile.food+self.towntithe)
                     tile.pop=min(tile.pop,tile.food-self.towntithe)
             else:
@@ -114,8 +121,8 @@ class civ():
         defenders=[pos for pos in target.neighbours if world.smap.tiles[pos].owner == targetagent.no]
         #attack=sum(world.smap.tiles[pos].army for pos in attackers)
         #defence=sum(world.smap.tiles[pos].army+world.smap.tiles[pos].pop*0.05 for pos in defenders)
-        attack=sum(world.smap.tiles[pos].pop*0.05 for pos in attackers)*self.tech["combat"]
-        defence=sum(world.smap.tiles[pos].pop*0.05 for pos in defenders)*targetagent.tech["combat"]
+        attack=sum(world.smap.tiles[pos].pop*0.05 for pos in attackers)
+        defence=sum(world.smap.tiles[pos].pop*0.05 for pos in defenders)
         defence*=defencebonus[target.ttype]
         if defence<=0:
             victorychance=1
@@ -148,6 +155,7 @@ class civ():
             target.neighbours=target.findneighbours(self.travel,ntiles,world.smap)
         target.owner=self.no
         self.squares+=[target.pos]
+        target.town=False
         
         
 
@@ -155,12 +163,12 @@ class civ():
 ntiles   = (150, 80)
 tilesize      = (12, 12)
 margin  = 1
-maptype = 'med'
+maptype = "continent"
 
 popgrowth=1.05
 food={"plains":1000,"desert":200,"mountain":100,"alpine":0,"sea":0}
 defencebonus={"plains":1,"desert":1.2,"mountain":2}
-move={"plains":1,"desert":1,"mountain":2,"sea":3}
+move={"plains":2,"desert":2,"mountain":3,"sea":4}
 combatmod=3
    
 n=8
