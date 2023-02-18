@@ -78,4 +78,8 @@ def animate(frame):
 
 anim = animation.FuncAnimation(figure, animate,frames=60, interval=1)
 
-plt.show()
+
+
+writergif = animation.PillowWriter(fps=30) 
+anim.save('boids.gif', writer=writergif)
+plt.close()

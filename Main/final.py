@@ -33,7 +33,7 @@ class civ():
         tile.owner=self.no
         tile.set_population(40*random())
         self.squares=[tile.pos]
-        self.travel=8
+        self.travel=4
         tile.neighbours=tile.findneighbours(self.travel,ntiles,world.smap)
         self.towntithe=0
         self.town=False
@@ -61,7 +61,7 @@ class civ():
         elif target:
             new=world.smap.tiles[choice(target)]
             self.combat(new)
-        else:
+        elif not tile.town:
             tile.surrounded=True
     def tilefulldumb(self,tile,moving):
         if len(tile.neighbours)!=0:
@@ -75,7 +75,7 @@ class civ():
                 tile.pop-=moving
             elif new.owner!=self.no:
                 self.combat(new)
-        else:
+        elif not tile.town:
             tile.surrounded=True
     def tick(self):
         full=0
@@ -92,14 +92,15 @@ class civ():
                     self.towntithe=(tile.pop-tile.food)/len(self.squares)
                     if self.towntithe>50:
                         self.tilefull(tile,tile.pop-tile.food+50*len(self.squares))
-                        tile.pop=tile.food+100*len(self.squares)
+                        tile.pop=tile.food+50*len(self.squares)
+                        self.towntithe=(tile.pop-tile.food)/len(self.squares)
                 elif tile.pop>tile.food-self.towntithe:
                     if not self.town:
                         full+=1
                         if full>4:
                             sites=[world.smap.tiles[pos] for pos in self.squares if world.smap.tiles[pos].coastal]
                             if sites:
-                                #choice(sites).town=True
+                                choice(sites).town=True
                                 self.town=True
                     self.tilefull(tile,tile.pop-tile.food+self.towntithe)
                     tile.pop=min(tile.pop,tile.food-self.towntithe)
@@ -160,12 +161,12 @@ class civ():
         
 
 
-ntiles   = (150, 80)
-tilesize      = (12, 12)
-margin  = 1
+ntiles   = (50, 50)
+tilesize      = (24, 24)
+margin  = 2
 maptype = "continent"
 
-popgrowth=1.05
+popgrowth=1.08
 food={"plains":1000,"desert":200,"mountain":100,"alpine":0,"sea":0}
 defencebonus={"plains":1,"desert":1.2,"mountain":2}
 move={"plains":2,"desert":2,"mountain":3,"sea":4}

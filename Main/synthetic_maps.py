@@ -129,8 +129,16 @@ class Map:
                     nfill += 1
                     if self.maptype=='continent':
                         self.tiles[x][y].ttype = 'sea'
+                        for i in range(4):
+                            current=self.tiles[(x-(i//2),y-(i%2))]
+                            current.coastal=True
+                            if current.ttype=="desert":
+                                current.ttype="plains"
+                            
                     elif self.maptype=="med":
                         self.tiles[x][y].ttype = 'plains'
+                        self.tiles[x][y].coastal=True
+                        self.tiles[x][y].food=food[self.tiles[x][y].ttype]*1.5
         #print ('   * filled inverse',nfill,'tiles.')
 
     def define_structures(self,struct):
