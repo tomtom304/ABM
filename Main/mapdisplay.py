@@ -22,15 +22,15 @@ class MapDisplay:
         self.colours=[]
         for i in range(self.ntiles[0]*self.ntiles[1]):
             self.colours.append((random.randint(0,255),random.randint(0,255),random.randint(0,255)))
-    def draw_map(self):
+    def draw_map(self,time):
         self.screen.fill((0,0,0))
+        timetext=pygame.font.SysFont("Times New Roman",50).render(str(time),False,(250,0,0))
         self.draw_tiles()
         self.draw_rivers()
-        #self.draw_borders()
+        self.screen.blit(timetext,(0,0))
         if self.display:
             pygame.display.flip()
 
-    #def draw_borders(self):
         
     
     def draw_tiles(self):
@@ -46,10 +46,8 @@ class MapDisplay:
                     if tile.owner!=-1:
                         pygame.draw.rect(self.screen, self.colours[tile.owner],
                                          pygame.Rect(xpos, ypos, self.xsize/2, self.ysize/2))
-                    if tile.food!=0:
                         colour=max(0,min(255*tile.pop/tile.food,254))
-                        pygame.draw.rect(self.screen, (colour,0,255-colour),
-                                     pygame.Rect(xpos, ypos+self.ysize/2, self.xsize/2, self.ysize/2))
+                        pygame.draw.rect(self.screen, (colour,0,255-colour),pygame.Rect(xpos+self.xsize/2, ypos+self.ysize/2, self.xsize/2, self.ysize/2))
                     if tile.town:
                         pygame.draw.rect(self.screen, "black",
                                          pygame.Rect(xpos+self.xsize/3, ypos+self.ysize/3, self.xsize/3, self.ysize/3))

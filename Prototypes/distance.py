@@ -2,8 +2,13 @@ import pygame
 import numpy as np
 import random as rnd
 import time
-import mapdisplay as display
 import rivers  as rivers
+PLAINS      = (154, 205,  50)
+DESERT     = (255, 215, 100)
+MOUNTAIN = (139,  69,  19)
+ALPINE        = (225,245,255)
+SEA            = ( 70, 130, 180)
+NOTHING   = (  0,   0,   0)
 
 # dimensions of map in tiles
 #NTILES   = (30, 20)
@@ -23,7 +28,7 @@ MAPSTRUCTS  = {'mountain':(5,0.1), 'desert':(2,0.1) }
 PRIVER     = {'alpine':0.1, 'mountain': 0.02, 'plains': 0.002}
 CIVNO=8
 food={"plains":1000,"desert":200,"mountain":100,"alpine":0,"sea":0,"none":0}
-move={"plains":2,"desert":2,"mountain":3,"sea":4,"alpine":100}
+move={"plains":2,"desert":2,"mountain":5,"sea":8,"alpine":100}
 
 
 class Tile:
@@ -72,8 +77,7 @@ class Tile:
                                 shortest[x,y][0]=new
                 shortest[current][1]=True
                 if len([1 for v in shortest.values() if not v[1]])==0:
-                    running=False
-            
+                    running=False  
         return {k:v[0] for k,v in shortest.items() if v[0]<=travel}
                     
 class Map:
@@ -233,17 +237,95 @@ class Map:
         pygame.font.init()
         pygame.display.set_caption('Synthetic Map Generation')
         screen = pygame.display.set_mode( (self.ntiles[0]*tdim[0], self.ntiles[1]*tdim[1]) )
-        self.display = display.MapDisplay(self,screen,tdim,margin)
+        self.display = MapDisplay(self,screen,tdim,margin)
 
     def draw_display(self):
         self.time+=1
         if self.display:
             self.display.draw_map(self.time)
+class MapDisplay:
+    def __init__(self, fullmap,screen,tdim,margin):
+        self.tiles   = fullmap.tiles
+        self.rivers = fullmap.rivers
+        self.ntiles  = fullmap.ntiles
+        self.screen = screen
+        self.display = self.screen!=None
+        self.tdim     = tdim
+        self.margin  = margin
+        self.xsize   = self.tdim[0]-2*self.margin
+        self.ysize   = self.tdim[1]-2*self.margin
+    def draw_map(self,time):
+        self.screen.fill((0,0,0))
+        timetext=pygame.font.SysFont("Times New Roman",50).render(str(time),False,(250,0,0))
+        self.draw_tiles()
+        self.draw_rivers()
+        self.screen.blit(timetext,(0,0))
+        if self.display:
+            pygame.display.flip()
+
+        
+    
+    def draw_tiles(self):##########
+
+
+        near=self.tiles[25][25].findneighbours(25,ntiles,world)
+        
+        for x in range(len(self.tiles)):
+            for y in range(len(self.tiles[x])):
+                distance=near.get((x,y), False)
+                tile   = self.tiles[x][y]
+                xpos = x*self.tdim[0] + self.margin
+                ypos = y*self.tdim[1] + self.margin
+                pygame.draw.rect(self.screen, self.display_colour(tile),pygame.Rect(xpos, ypos, self.xsize, self.ysize))
+                if distance:
+                    pygame.draw.rect(self.screen, (distance*10,0,256-distance*10),pygame.Rect(xpos, ypos, self.xsize/2, self.ysize/2))
+                    
+    def draw_rivers(self):        
+        for river in self.rivers:
+            for i in range(len(river.links)-1):
+                x0 = river.links[i][0]
+                y0 = river.links[i][1]
+                x1 = river.links[i+1][0]
+                y1 = river.links[i+1][1]
+                if x1<x0:
+                    x0,x1=x1,x0
+                if y1<y0:
+                    y0,y1=y1,y0
+
+                xsize = (x1-x0)*self.tdim[0]+4*self.margin
+                ysize = (y1-y0)*self.tdim[1]+4*self.margin
+                if x1==x0:
+                    xsize = 4*self.margin
+                if y1==y0:
+                    ysize = 4*self.margin
+                if self.display:
+                    pygame.draw.rect(self.screen,SEA,pygame.Rect(x0*self.tdim[0]-2*self.margin, y0*self.tdim[1]-2*self.margin, xsize, ysize))
+                    if  x1==self.ntiles[0]-1:
+                        pygame.draw.rect(self.screen,SEA,pygame.Rect( x1*self.tdim[0]-2*self.margin, y0*self.tdim[1]-2*self.margin, xsize, ysize))
+                    if  y1==self.ntiles[1]-1:
+                        pygame.draw.rect(self.screen,SEA,pygame.Rect( x0*self.tdim[0]-2*self.margin, y1*self.tdim[1]-2*self.margin, xsize, ysize))
+                #print ("drawing [",x0,y0,"] -> [",x1,y1,"]")
+
+    def display_colour(self,tile):
+        if (tile.ttype=='plains'):
+            return PLAINS
+        elif (tile.ttype=='desert'):
+            return DESERT
+        elif (tile.ttype=='mountain'):
+            return MOUNTAIN
+        elif (tile.ttype=='alpine'):
+            return ALPINE
+        elif (tile.ttype=='sea'):
+            return SEA
+        return NOTHING
 
 if __name__ == '__main__' :
     #print ("Testing map generation")
-    synth_map = Map(MAPTYPE)
-    if DISPLAY:
-        synth_map.init_display(TDIM,MARGIN)
-        synth_map.draw_display()
-    
+    ntiles=(50,50)
+    tilesize      = (20, 20)
+    margin  = 1
+    maptype = "continent"
+    world = Map(ntiles,maptype)
+    world.init_display(tilesize,margin)
+    world.draw_display()
+
