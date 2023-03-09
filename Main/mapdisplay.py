@@ -47,7 +47,7 @@ class MapDisplay:
                         pygame.draw.rect(self.screen, self.colours[tile.owner],
                                          pygame.Rect(xpos, ypos, self.xsize/2, self.ysize/2))
                         colour=max(0,min(255*tile.pop/tile.food,254))
-                        pygame.draw.rect(self.screen, (colour,0,255-colour),pygame.Rect(xpos+self.xsize/2, ypos+self.ysize/2, self.xsize/2, self.ysize/2))
+                        #pygame.draw.rect(self.screen, (colour,0,255-colour),pygame.Rect(xpos+self.xsize/2, ypos+self.ysize/2, self.xsize/2, self.ysize/2))
                     if tile.town:
                         pygame.draw.rect(self.screen, "black",
                                          pygame.Rect(xpos+self.xsize/3, ypos+self.ysize/3, self.xsize/3, self.ysize/3))

@@ -42,12 +42,17 @@ class civ():
                 newx=self.x+i
                 newy=self.y+j
                 if abs(i+j)==1 and -1<newx and newx<ntiles[0] and newy>-1 and newy<ntiles[1] and world.smap.tiles[newx,newy].ttype not in ("sea","alpine"):
-                    tile.touching.append(world.smap.tiles[newx,newy])
+
+                    crossing=False
+                    for river in world.smap.rivers:
+                        if [max(self.x,newx),max(self.y,newy)] in river.links:
+                            crossing=True
+                    tile.touching.append([world.smap.tiles[newx,newy],crossing])
         self.towntithe=1
         self.town=False
         self.army=0
     def tilefull(self,tile,moving,travel):
-        new=choice(tile.touching)
+        new,crossing=choice(tile.touching)
         if new.coastal:
             travel-=1
         else:
@@ -56,7 +61,7 @@ class civ():
             if new.owner==-1:
                 new.pop=moving
                 self.gainsquare(new)
-                return False,False
+                return False,False,False
             elif new.owner==self.no:
                 if new.town:
                     settling=tile.food+self.produce*(1-maxtax)-new.pop
@@ -67,9 +72,9 @@ class civ():
                     moving=max(0,moving-settling)
                 return self.tilefull(new,moving,travel)
             else:
-                return new,moving
+                return new,moving,crossing
         else:
-            return False,False
+            return False,False,False
     
     def tick(self):
         full=0
@@ -82,18 +87,16 @@ class civ():
                 tile.owner=-1
                 tile.pop=0
                 self.squares=[owned for owned in self.squares if owned!=tile]
-            #If capital
             elif tile.town==True:
                 self.towntithe=1-max(0,(tile.pop-tile.food))/self.produce
                 self.army=tile.pop*militia
                 if self.towntithe<maxtax:
-                    new,moving=self.tilefull(tile,self.produce*(maxtax-self.towntithe),self.travel)
+                    new,moving,crossing=self.tilefull(tile,self.produce*(maxtax-self.towntithe),self.travel)
                     tile.pop=tile.food+self.produce*(1-maxtax)
                     self.towntithe=maxtax
                     if new:
-                        targets[new] = targets.get(new, 0) + moving
-            #If full
-            elif tile.pop>tile.food*self.towntithe:
+                        targets[new] = (targets.get(new, (0,False))[0] + moving,crossing)
+            elif tile.pop>tile.food-self.towntithe:
                 if not self.town:
                     full+=1
                     if full>4:
@@ -103,21 +106,22 @@ class civ():
                             capital.town=True
                             self.town=capital
                             self.produce=sum([source.food for source in self.squares if not source.town])
-                new,moving=self.tilefull(tile,tile.pop-tile.food*self.towntithe,self.travel)
+                new,moving,crossing=self.tilefull(tile,tile.pop-tile.food*self.towntithe,self.travel)
                 tile.pop=min(tile.pop,tile.food*self.towntithe)
                 if new:
-                    targets[new] = targets.get(new, 0) + moving
+                    targets[new] = (targets.get(new, (0,False))[0] + moving,crossing)
+                
                     
 
 
         if targets:
             for target,army in targets.items():    
-                self.combat(target,army)#+self.army/len(targets))
+                self.combat(target,army[0],army[1])#+self.army/len(targets))
         if not self.squares:
             return True
         else:
             return False
-    def combat(self,target,mob):
+    def combat(self,target,mob,crossing):
         targetagent=agents[target.owner]
         if targetagent.travel!=self.travel:
             attackers=[pos for pos in target.findneighbours(self.travel,ntiles,world.smap) if world.smap.tiles[pos].owner == self.no]
@@ -126,7 +130,7 @@ class civ():
         defenders=[pos for pos in target.neighbours if world.smap.tiles[pos].owner == targetagent.no]
         attack=sum(world.smap.tiles[pos].pop*militia for pos in attackers)+mob
         defence=sum(world.smap.tiles[pos].pop*militia for pos in defenders)#+targetagent.army
-        defence*=defencebonus[target.ttype]
+        defence*=(defencebonus[target.ttype]+riverbonus*crossing)
         victorychance=(math.tanh(combatmod*math.log(attack/defence))+1)/2
         if victorychance>=random():
             self.gainsquare(target)
@@ -168,6 +172,7 @@ maptype = "continent"
 popgrowth=1.05
 food={"plains":1000,"desert":200,"mountain":100,"alpine":0,"sea":0}
 defencebonus={"plains":1,"desert":1.2,"mountain":2}
+riverbonus=100
 move={"plains":2,"desert":2,"mountain":3,"sea":4}
 combatmod=3
 militia=0.05
