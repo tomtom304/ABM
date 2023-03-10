@@ -74,7 +74,7 @@ class Tile:
                 if len([1 for v in shortest.values() if not v[1]])==0:
                     running=False
             
-        return {k:v[0] for k,v in shortest.items() if v[0]<=travel}
+        return {world.tiles[k] for k,v in shortest.items() if v[0]<=travel}
                     
 class Map:
     def __init__(self, ntiles, maptype='continent', structs=MAPSTRUCTS):

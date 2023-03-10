@@ -19,9 +19,9 @@ class MapDisplay:
         self.margin  = margin
         self.xsize   = self.tdim[0]-2*self.margin
         self.ysize   = self.tdim[1]-2*self.margin
-        self.colours=[]
+        self.colours={}
         for i in range(self.ntiles[0]*self.ntiles[1]):
-            self.colours.append((random.randint(0,255),random.randint(0,255),random.randint(0,255)))
+            self.colours[i]=(random.randint(0,255),random.randint(0,255),random.randint(0,255))
     def draw_map(self,time):
         self.screen.fill((0,0,0))
         timetext=pygame.font.SysFont("Times New Roman",50).render(str(time),False,(250,0,0))
@@ -44,6 +44,8 @@ class MapDisplay:
                     pygame.draw.rect(self.screen, self.display_colour(tile),
                                      pygame.Rect(xpos, ypos, self.xsize, self.ysize))
                     if tile.owner!=-1:
+                        if tile.owner not in self.colours:
+                            self.colours[tile.owner]=(random.randint(0,255),random.randint(0,255),random.randint(0,255))
                         pygame.draw.rect(self.screen, self.colours[tile.owner],
                                          pygame.Rect(xpos, ypos, self.xsize/2, self.ysize/2))
                         colour=max(0,min(255*tile.pop/tile.food,254))

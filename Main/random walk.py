@@ -14,8 +14,6 @@ class map():
     def init_map(self):
         return smaps.Map(ntiles,maptype)
             
-##    def init_pops(self):
-##        pass
 
     def init_display(self,tilesize,margin):
         self.smap.init_display(tilesize,margin)
@@ -31,7 +29,8 @@ class civ():
         self.y=y
         tile=world.smap.tiles[self.x,self.y]
         tile.owner=self.no
-        tile.set_population(40*random())
+        if tile.pop==0:
+            tile.set_population(40*random())
         tile.food=food[tile.ttype]
         self.squares=[tile]
         self.travel=5
@@ -49,6 +48,9 @@ class civ():
                         if [max(self.x,newx),max(self.y,newy)] in river.links:
                             crossing=True
                     tile.neighbours.append((world.smap.tiles[newx,newy],crossing))
+        self.nomad=False
+        if tile.ttype=="desert":
+            self.nomad=True
     def tilefull(self,tile,moving,travel):
         new,crossing=choice(tile.neighbours)
         if new.coastal:
@@ -78,8 +80,7 @@ class civ():
     def tick(self):
         full=0
         targets={}
-        if self.town:
-            self.produce=max(1,sum([source.food for source in self.squares if not source.town]))
+        self.produce=max(1,sum([source.food for source in self.squares if not source.town]))
         for tile in self.squares:
             #If empty
             if tile.pop<0:
@@ -104,41 +105,71 @@ class civ():
                             capital=choice(sites)
                             capital.town=True
                             self.town=capital
-                            self.produce=sum([source.food for source in self.squares if not source.town])
+                            self.homeland=capital.findneighbours(self.travel,ntiles,world.smap)
+                            self.produce=max(1,sum([source.food for source in self.squares if not source.town]))
                 new,moving,crossing=self.tilefull(tile,tile.pop-tile.food*self.towntithe,self.travel)
                 tile.pop=min(tile.pop,tile.food*self.towntithe)
                 if new:
                     targets[new] = (targets.get(new, (0,False))[0] + moving,crossing)
                 
-
+        newcivs=[]
         if targets:
-            for target,army in targets.items():    
-                self.combat(target,army[0],army[1])#+self.army/len(targets))
-        if not self.squares:
-            return True
+            rebel=0
+            for target,army in targets.items():
+                newciv = self.combat(target,army[0]+self.army/len(targets),army[1])
+                if newciv:
+                    newcivs.append(newciv)
+                if self.town:
+                    if target not in self.homeland:
+                        rebel+=1
+            if rebel and len(targets)!=rebel:
+                if (math.tanh(combatmod*math.log(rebel/(len(targets)-rebel)))+1)/2>=random():
+                    rebellion=choice(list(targets.keys()))
+                    newcivs.append(rebellion)
+        if newcivs:
+            return newcivs
+        elif not self.squares:
+            return "del"
         else:
             return False
     def combat(self,target,army,crossing):
         targetagent=agents[target.owner]
         defence=target.pop*militia#+targetagent.army
         defence*=(defencebonus[target.ttype]+riverbonus*crossing)
-        victorychance=(math.tanh(combatmod*math.log(army/defence))+1)/2
-        #if targetagent.town:
-            #targetagent.town.pop*(1-random()*militia*loss)
+        if defence<=0:
+            victorychance=1
+        else:
+        
+            victorychance=(math.tanh(combatmod*math.log(army*armybonus/defence))+1)/2
+        if targetagent.town:
+            targetagent.town.pop*(1-random()*militia*loss)
         if victorychance>=random():
-            self.gainsquare(target)
+            newciv=self.gainsquare(target)
+            if newciv:
+                target.pop+=self.produce/10
+                for square in self.squares:
+                    square.pop*=0.9
             target.pop=target.pop*(1-random()*militia*loss)+army*(1-random()*loss)
+            return newciv
         else:
             target.pop=target.pop*(1-random()*militia*loss)
+        return False
+            
     def gainsquare(self,target):
-        if target.owner!=-1:
-            targetagent=agents[target.owner]
-            targetagent.squares=[square for square in targetagent.squares if square!=target]
-            if target.town:
-                targetagent.town=False
-        target.owner=self.no
-        self.squares.append(target)
-        target.town=False
+        if self.nomad and target.ttype!="desert":
+            target.town=False
+            return target
+            
+        elif self.nomad or target.ttype!="desert":
+            if target.owner!=-1:
+                targetagent=agents[target.owner]
+                targetagent.squares=[square for square in targetagent.squares if square!=target]
+                if target.town:
+                    targetagent.town=False
+            target.owner=self.no
+            self.squares.append(target)
+            target.town=False
+        return False
         
         
 
@@ -151,15 +182,18 @@ maptype = "continent"
 popgrowth=1.05
 food={"plains":1000,"desert":200,"mountain":100,"alpine":0,"sea":0}
 defencebonus={"plains":1,"desert":1.2,"mountain":2}
-riverbonus=100
+riverbonus=2
+armybonus=1
 move={"plains":2,"desert":2,"mountain":3,"sea":4}
 combatmod=3
 loss=0.5
 militia=0.1
 maxtax=0.8
 
+
 world = map(maptype,ntiles)
 world.init_display(tilesize,margin)
+nomadcount=1
 agents={}
 for i in range(ntiles[0]):
     for j in range(ntiles[1]):
@@ -170,12 +204,18 @@ while True:
     for i in range(ntiles[0]):
         for j in range(ntiles[1]):
             world.smap.tiles[(i,j)].pop*=popgrowth
-    remove=[]
+    remove,add=[],[]
     for key,a in agents.items():
-        if a.tick():
+        changes=a.tick()
+        if changes=="del":
             remove.append(key)
+        elif changes:
+            add+=changes
     for key in remove:
         del agents[key]
+    for new in add:
+        agents[ntiles[0]*ntiles[1]+nomadcount]=civ(ntiles[0]*ntiles[1]+nomadcount,new.pos[0],new.pos[1])
+        nomadcount+=1
     world.draw()
 print("fin")
 
