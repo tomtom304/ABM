@@ -223,8 +223,8 @@ class Map:
             for i in range(4):
                 current=self.tiles[(pos[0]-(i//2),pos[1]-(i%2))]
                 current.coastal=True
-                if current.ttype=="desert":
-                    current.ttype="plains"
+                #if current.ttype=="desert":
+                 #   current.ttype="plains"
         return river
 
     

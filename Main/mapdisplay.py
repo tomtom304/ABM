@@ -6,7 +6,7 @@ MOUNTAIN = (139,  69,  19)
 ALPINE        = (225,245,255)
 SEA            = ( 70, 130, 180)
 NOTHING   = (  0,   0,   0)
-
+save=False
 
 class MapDisplay:
     def __init__(self, fullmap,screen,tdim,margin):
@@ -24,12 +24,15 @@ class MapDisplay:
             self.colours[i]=(random.randint(0,255),random.randint(0,255),random.randint(0,255))
     def draw_map(self,time):
         self.screen.fill((0,0,0))
-        timetext=pygame.font.SysFont("Times New Roman",50).render(str(time),False,(250,0,0))
+        timetext=pygame.font.SysFont("Times New Roman",50).render(str(time-5000),False,(250,0,0))
         self.draw_tiles()
         self.draw_rivers()
         self.screen.blit(timetext,(0,0))
         if self.display:
             pygame.display.flip()
+            if save:
+                filename="screen_%04d.png" % time
+                pygame.image.save(self.screen,filename)
 
         
     
