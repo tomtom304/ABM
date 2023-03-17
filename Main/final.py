@@ -117,22 +117,45 @@ class civ():
 
         newcivs=[]
         if targets:
+            armytarget=[]
             rebel=0
+            if self.town:
+                targetsize=ntiles[1]*ntiles[0]
+                
+                civtarget=-1
+                for target,army in targets.items():
+                    if target.owner!=-1:
+                        if target.town:
+                            armytarget=[target]
+                            targetsize=1
+                        elif len(agents[target.owner].squares)<targetsize and agents[target.owner].nomad==self.nomad :
+                            targetsize=len(agents[target.owner].squares)
+                            armytarget=[target]
+                            civtarget=target.owner
+                        elif target.owner==civtarget:
+                            armytarget+=[target]
+                        
             for target,army in targets.items():
-                if target.owner!=-1:
-                    newciv = self.combat(target,army[0]+self.army/len(targets),army[1])
+                if target.owner==-1:
+                    newciv=self.gainsquare(target)
+                    if newciv:
+                        newcivs.append(newciv)
+                elif target.owner!=self.no:
+                    if target in armytarget:
+                        newciv = self.combat(target,army[0],self.army/len(armytarget),army[1])
+                    else:
+                        newciv = self.combat(target,army[0],0,army[1])
                     if newciv:
                         newcivs.append(newciv)
                     if self.town:
                         if target not in self.town.neighbours:
                             rebel+=1
-                else:
-                    self.gainsquare(target)
+                
             if rebel and len(targets)!=rebel:
                 if (math.tanh(combatmod*math.log(rebel/(len(targets)-rebel)))+1)/2>=random():
                     rebellion=choice(list(targets.keys()))
-                    rebellion.pop+=self.army-rebel/(len(targets))
-                    self.town.pop-=self.army-rebel/(len(targets))
+                    rebellion.pop+=self.army*rebel/(len(targets))
+                    self.town.pop-=self.army*rebel/(len(targets))
                                                     
                     newcivs.append(rebellion)
         if newcivs:
@@ -141,34 +164,49 @@ class civ():
             return "del"
         else:
             return False
-    def combat(self,target,mob,crossing):
+    def combat(self,target,mob,army,crossing):
         targetagent=agents[target.owner]
         attackers=[pos for pos in target.neighbours if pos.owner == self.no]
         defenders=[pos for pos in target.neighbours if pos.owner == targetagent.no]
-        attack=sum(pos.pop*militia for pos in attackers)+mob*armybonus
-        defence=sum(pos.pop*militia for pos in defenders)#+targetagent.army
+        defendingarmy=0
+        if mob>target.pop*militia:
+            defendingarmy=targetagent.army
+        attack=sum(pos.pop*militia for pos in attackers)+mob+army*armybonus
+        defence=sum(pos.pop*militia for pos in defenders)+defendingarmy*armybonus
         defence*=(defencebonus[target.ttype]+riverbonus*crossing)
         if defence<=0:
             victorychance=1
+        elif attack<=0:
+            victorychance=0
         else:
-        
             victorychance=(math.tanh(combatmod*math.log(attack/defence))+1)/2
         if victorychance>=random():
             newciv=self.gainsquare(target)
+            if newciv and self.nomad:
+                exodus=0
+                for square in self.squares:
+                    exodus+=square.pop*0.1
+                    square.pop*=0.9
+                target.pop+=exodus
             for pos in attackers:
-                pos.pop*=(1-random()*victoryloss)
+                pos.pop*=(1-random()*victoryloss*militia)
             for pos in defenders:
-                pos.pop*=(1-random()*defeatloss)
+                pos.pop*=(1-random()*defeatloss*militia)
             if targetagent.town:
-                targetagent.town.pop*(1-random()*militia*defeatloss)
+                targetagent.town.pop-=defendingarmy*(1-random()*defeatloss)
+            target.pop+=mob*(1-random()*victoryloss)
+            if self.town:
+                self.town.pop-=army*(1-random()*victoryloss)
             return newciv
         else:
             for pos in attackers:
-                pos.pop*=(1-random()*stalemate)
+                pos.pop*=(1-random()*stalemate*militia)
             for pos in defenders:
-                pos.pop*=(1-random()*stalemate)
+                pos.pop*=(1-random()*stalemate*militia)
             if targetagent.town:
-                targetagent.town.pop*(1-random()*militia*stalemate)
+                targetagent.town.pop-=defendingarmy*(1-random()*stalemate)
+            if self.town:
+                self.town.pop-=army*(1-random()*stalemate)
         return False
     def gainsquare(self,target):
         if self.nomad and target.ttype!="desert":
@@ -202,7 +240,7 @@ move={"plains":2,"desert":2,"mountain":3,"sea":4}
 combatmod=3
 militia=0.05
 victoryloss=0.1
-defeatloss=0.3
+defeatloss=0.5
 stalemate=0.2
 maxtax=0.8
 nomadcount=1

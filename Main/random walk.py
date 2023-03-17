@@ -114,17 +114,44 @@ class civ():
                 
         newcivs=[]
         if targets:
+            armytarget=[]
             rebel=0
+            if self.town:
+                
+                targetsize=ntiles[1]*ntiles[0]
+                civtarget=-1
+                for target,army in targets.items():
+                    if target.owner!=-1:
+                        if target.town:
+                            armytarget=[target]
+                            targetsize=1
+                        elif len(agents[target.owner].squares)<targetsize and agents[target.owner].nomad==self.nomad :
+                            targetsize=len(agents[target.owner].squares)
+                            armytarget=[target]
+                            civtarget=target.owner
+                        elif target.owner==civtarget:
+                            armytarget+=[target]
             for target,army in targets.items():
-                newciv = self.combat(target,army[0]+self.army/len(targets),army[1])
-                if newciv:
-                    newcivs.append(newciv)
-                if self.town:
-                    if target not in self.homeland:
-                        rebel+=1
+                if target.owner==-1:
+                    newciv=self.gainsquare(target)
+                    if newciv:
+                        newcivs.append(newciv)
+                elif target.owner!=self.no:
+                    if target in armytarget:
+                        newciv = self.combat(target,army[0],self.army/len(armytarget),army[1])
+                        self.town.pop-=self.army/len(armytarget)
+                    else:
+                        newciv = self.combat(target,army[0],0,army[1])
+                    if newciv:
+                        newcivs.append(newciv)
+                    if self.town:
+                        if target not in self.homeland:
+                            rebel+=1
             if rebel and len(targets)!=rebel:
                 if (math.tanh(combatmod*math.log(rebel/(len(targets)-rebel)))+1)/2>=random():
                     rebellion=choice(list(targets.keys()))
+                    rebellion.pop+=self.army*rebel/(len(targets))
+                    self.town.pop-=self.army*rebel/(len(targets))
                     newcivs.append(rebellion)
         if newcivs:
             return newcivs
@@ -132,24 +159,34 @@ class civ():
             return "del"
         else:
             return False
-    def combat(self,target,army,crossing):
+    def combat(self,target,mob,army,crossing):
         targetagent=agents[target.owner]
-        defence=target.pop*militia#+targetagent.army
+        defendingarmy=0
+        if mob>target.pop*militia:
+            defendingarmy=targetagent.army
+        defence=target.pop*militia+defendingarmy*armybonus
         defence*=(defencebonus[target.ttype]+riverbonus*crossing)
+        attack=mob+army*armybonus
         if defence<=0:
             victorychance=1
+        elif attack<=0:
+            victorychance=0
         else:
         
-            victorychance=(math.tanh(combatmod*math.log(army*armybonus/defence))+1)/2
+            victorychance=(math.tanh(combatmod*math.log(attack/defence))+1)/2
         if targetagent.town:
-            targetagent.town.pop*(1-random()*militia*loss)
+            targetagent.town.pop-=defendingarmy*(1-random()*loss)
+        if self.town:
+            self.town.pop-=army*(1-random()*loss)
         if victorychance>=random():
             newciv=self.gainsquare(target)
-            if newciv:
-                target.pop+=self.produce/10
+            if newciv and self.nomad:
+                exodus=0
                 for square in self.squares:
+                    exodus+=square.pop*0.1
                     square.pop*=0.9
-            target.pop=target.pop*(1-random()*militia*loss)+army*(1-random()*loss)
+                target.pop+=exodus
+            target.pop=target.pop*(1-random()*militia*loss)+mob*(1-random()*loss)
             return newciv
         else:
             target.pop=target.pop*(1-random()*militia*loss)
@@ -187,7 +224,7 @@ armybonus=1
 move={"plains":2,"desert":2,"mountain":3,"sea":4}
 combatmod=3
 loss=0.5
-militia=0.1
+militia=0.05
 maxtax=0.8
 
 
