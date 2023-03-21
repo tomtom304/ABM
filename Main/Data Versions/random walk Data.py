@@ -14,11 +14,7 @@ class map():
         return smaps.Map(ntiles,maptype)
             
 
-    def init_display(self,tilesize,margin):
-        self.smap.init_display(tilesize,margin)
 
-    def draw(self):
-        self.smap.draw_display()
         
 class civ():
     def __init__(self,no,x,y):
@@ -37,6 +33,8 @@ class civ():
         self.town=False
         self.army=0
         tile.neighbours=[]
+        self.colour=(random(),random(),random())
+        self.produce=1
         for i in (-1,0,1):
             for j in (-1,0,1):
                 newx=self.x+i
@@ -226,33 +224,53 @@ loss=0.5
 militia=0.05
 maxtax=0.8
 
+fig,ax=plt.subplots()
+fig.set_tight_layout(True)
 
 world = map(maptype,ntiles)
-world.init_display(tilesize,margin)
 nomadcount=1
 agents={}
 for i in range(ntiles[0]):
     for j in range(ntiles[1]):
         if world.smap.tiles[(i,j)].ttype not in ["sea","alpine"]:
             agents[i+j*ntiles[0]]=civ(i+j*ntiles[0],i,j)
-world.draw()
-while True:
+time=1
+#fooddata=[sum([a.produce for a in agents.values()])/len(agents)]
+#sizedata=[max([max([tile.pop for tile in a.squares if tile.town]+[1]) for a in agents.values()])]
+newdata=[0]
+deaddata=[0]
+
+
+#plt.plot(range(len(sizedata)),sizedata,label="mean size")
+#plt.show(block=False)
+while time<1000:
+    time+=1
     for i in range(ntiles[0]):
         for j in range(ntiles[1]):
             world.smap.tiles[(i,j)].pop*=popgrowth
     remove,add=[],[]
     for key,a in agents.items():
         changes=a.tick()
-        if changes=="del":
+        if changes=="del" or len(a.squares)==0:
             remove.append(key)
         elif changes:
             add+=changes
+    deaddata+=[len(remove)]
+    newdata+=[len(add)]     
     for key in remove:
+        
         del agents[key]
     for new in add:
         agents[ntiles[0]*ntiles[1]+nomadcount]=civ(ntiles[0]*ntiles[1]+nomadcount,new.pos[0],new.pos[1])
         nomadcount+=1
-    world.draw()
+    #sizedata+=[max([max([tile.pop for tile in a.squares if tile.town]+[1]) for a in agents.values()])]
+    #plt.plot(range(len(sizedata)),sizedata,label="mean size")
+    #plt.show(block=False)
+    #plt.pause(0.001)
+    ######
+plt.plot(range(len(deaddata)),deaddata,label="mean size")
+plt.plot(range(len(newdata)),newdata,label="mean size")
+plt.show()
 print("fin")
 
 

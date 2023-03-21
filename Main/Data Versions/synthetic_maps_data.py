@@ -2,7 +2,6 @@
 import numpy as np
 import random as rnd
 import time
-import mapdisplay as display
 import rivers  as rivers
 
 # dimensions of map in tiles
