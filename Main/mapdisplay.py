@@ -1,6 +1,7 @@
 import pygame
 import random
 PLAINS      = (154, 205,  50)
+Forrest = (75,100,25)
 DESERT     = (255, 215, 100)
 MOUNTAIN = (139,  69,  19)
 ALPINE        = (225,245,255)
@@ -98,6 +99,8 @@ class MapDisplay:
             return ALPINE
         elif (tile.ttype=='sea'):
             return SEA
+        elif tile.ttype=="forrest":
+            return Forrest
         return NOTHING
 
 
