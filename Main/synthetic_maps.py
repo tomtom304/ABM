@@ -221,8 +221,7 @@ class Map:
         river.meander(self)
         for pos in river.links:
             for i in range(4):
-                current=self.tiles[(pos[0]-(i//2),pos[1]-(i%2))]
-                current.coastal=True
+                self.tiles[(pos[0]-(i//2),pos[1]-(i%2))].coastal=True
                 #if current.ttype=="desert":
                  #   current.ttype="plains"
         return river

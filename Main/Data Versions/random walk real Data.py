@@ -1,17 +1,17 @@
 from random import *
 import matplotlib.pyplot as plt
 import numpy as np      
-import synthetic_maps_data as smaps 
+import real_maps_data as smaps 
 import time
 import math
 
 
 class map():
-    def __init__(self,maptype,ntiles):
+    def __init__(self):
         self.smap          = self.init_map()
     
     def init_map(self):
-        return smaps.Map(ntiles,maptype)
+        return smaps.Map()
             
 
 
@@ -49,31 +49,33 @@ class civ():
         if tile.ttype=="desert":
             self.nomad=True
     def tilefull(self,tile,moving,travel):
-        new,crossing=choice(tile.neighbours)
-        if new.coastal:
-            travel-=1
-        else:
-            travel-=move[new.ttype]
-        if travel>-1 and moving>0:
-            if new.owner==-1:
-                new.pop=moving
-                self.gainsquare(new)
-                return False,False,False
-            elif new.owner==self.no:
-                if new.town:
-                    settling=tile.food+self.produce*(1-maxtax)-new.pop
-                else:
-                    settling=new.food*self.towntithe-new.pop
-                if settling>0:
-                    new.pop+=min(settling,moving)
-                    moving=max(0,moving-settling)
-                return self.tilefull(new,moving,travel)
+        if tile.neighbours:
+            new,crossing=choice(tile.neighbours)
+            if new.coastal:
+                travel-=1
             else:
-                        
-                return new,moving,crossing
+                travel-=move[new.ttype]
+            if travel>-1 and moving>0:
+                if new.owner==-1:
+                    new.pop=moving
+                    self.gainsquare(new)
+                    return False,False,False
+                elif new.owner==self.no:
+                    if new.town:
+                        settling=tile.food+self.produce*(1-maxtax)-new.pop
+                    else:
+                        settling=new.food*self.towntithe-new.pop
+                    if settling>0:
+                        new.pop+=min(settling,moving)
+                        moving=max(0,moving-settling)
+                    return self.tilefull(new,moving,travel)
+                else:
+                            
+                    return new,moving,crossing
+            else:
+                return False,False,False
         else:
-            return False,False,False
-                
+            return False,False,False     
     def tick(self):
         full=0
         targets={}
@@ -208,10 +210,9 @@ class civ():
         
 
 
-ntiles   = (150, 80)
-tilesize      = (12, 12)
+ntiles   = (400, 200)
+tilesize      = (6, 6)
 margin  = 1
-maptype = "continent"
 
 popgrowth=1.05
 food={"plains":1000,"desert":50,"mountain":100,"alpine":0,"sea":0,"forest":200}
@@ -227,7 +228,7 @@ maxtax=0.8
 fig,ax=plt.subplots()
 fig.set_tight_layout(True)
 
-world = map(maptype,ntiles)
+world = map()
 nomadcount=1
 agents={}
 for i in range(ntiles[0]):
@@ -268,6 +269,7 @@ while time<1000:
     #plt.show(block=False)
     #plt.pause(0.001)
     ######
+    print("tick")
 plt.plot(range(len(deaddata)),deaddata,label="mean size")
 plt.plot(range(len(newdata)),newdata,label="mean size")
 plt.show()

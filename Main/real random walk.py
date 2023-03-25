@@ -52,28 +52,31 @@ class civ():
         if tile.ttype=="desert":
             self.nomad=True
     def tilefull(self,tile,moving,travel):
-        new,crossing=choice(tile.neighbours)
-        if new.coastal:
-            travel-=1
-        else:
-            travel-=move[new.ttype]
-        if travel>-1 and moving>0:
-            if new.owner==-1:
-                new.pop=moving
-                self.gainsquare(new)
-                return False,False,False
-            elif new.owner==self.no:
-                if new.town:
-                    settling=tile.food+self.produce*(1-maxtax)-new.pop
-                else:
-                    settling=new.food*self.towntithe-new.pop
-                if settling>0:
-                    new.pop+=min(settling,moving)
-                    moving=max(0,moving-settling)
-                return self.tilefull(new,moving,travel)
+        if tile.neighbours:
+            new,crossing=choice(tile.neighbours)
+            if new.coastal:
+                travel-=1
             else:
-                        
-                return new,moving,crossing
+                travel-=move[new.ttype]
+            if travel>-1 and moving>0:
+                if new.owner==-1:
+                    new.pop=moving
+                    self.gainsquare(new)
+                    return False,False,False
+                elif new.owner==self.no:
+                    if new.town:
+                        settling=tile.food+self.produce*(1-maxtax)-new.pop
+                    else:
+                        settling=new.food*self.towntithe-new.pop
+                    if settling>0:
+                        new.pop+=min(settling,moving)
+                        moving=max(0,moving-settling)
+                    return self.tilefull(new,moving,travel)
+                else:
+                            
+                    return new,moving,crossing
+            else:
+                return False,False,False
         else:
             return False,False,False
                 
@@ -216,7 +219,7 @@ tilesize      = (6, 6)
 margin  = 1
 
 popgrowth=1.05
-food={"plains":1000,"desert":200,"mountain":100,"alpine":0,"sea":0,"forest":200}
+food={"plains":1000,"desert":50,"mountain":100,"alpine":0,"sea":0,"forest":200}
 defencebonus={"plains":1,"desert":1.2,"mountain":2,"forest":2}
 riverbonus=2
 armybonus=1

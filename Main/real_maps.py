@@ -11,11 +11,11 @@ import csv
 #TDIM      = (10, 10)
 #MARGIN  = 2
 # display for executable test?
-DISPLAY = True
-DISPTIME = 100
+#DISPLAY = True
+#DISPTIME = 100
 # type of map: 'continent' or "med"
 
-food={"plains":1000,"desert":200,"mountain":100,"alpine":0,"sea":0,"none":0,"forest":200}
+food={"plains":1000,"desert":50,"mountain":100,"alpine":0,"sea":0,"none":0,"forest":200}
 move={"plains":2,"desert":2,"mountain":3,"sea":4,"alpine":100,"forest":3}
 
 
@@ -103,6 +103,8 @@ class Map:
                 x,y=int(row[0])-1,200-int(row[1])
                 if int(row[4]) in (200,80,90):
                     self.tiles[x,y].ttype="sea"
+                    for i in range(4):
+                        self.tiles[(x-(i//2)),(y-(i%2))].coastal=True
                 elif int(row[4])==60:
                     self.tiles[x,y].ttype="desert"
                 elif int(row[4]) in (40,50):

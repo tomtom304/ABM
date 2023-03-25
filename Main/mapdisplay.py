@@ -1,7 +1,7 @@
 import pygame
 import random
 PLAINS      = (154, 205,  50)
-Forrest = (75,100,25)
+Forrest = (100,150,25)
 DESERT     = (255, 215, 100)
 MOUNTAIN = (139,  69,  19)
 ALPINE        = (225,245,255)
@@ -51,7 +51,7 @@ class MapDisplay:
                         if tile.owner not in self.colours:
                             self.colours[tile.owner]=(random.randint(0,255),random.randint(0,255),random.randint(0,255))
                         pygame.draw.rect(self.screen, self.colours[tile.owner],
-                                         pygame.Rect(xpos, ypos, self.xsize/2, self.ysize/2))
+                                         pygame.Rect(xpos, ypos, self.xsize+self.margin, self.ysize+self.margin))
                         colour=max(0,min(255*tile.pop/tile.food,254))
                         #pygame.draw.rect(self.screen, (colour,0,255-colour),pygame.Rect(xpos+self.xsize/2, ypos+self.ysize/2, self.xsize/2, self.ysize/2))
                     if tile.town:

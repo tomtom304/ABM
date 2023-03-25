@@ -1,24 +1,18 @@
 from random import *
 import matplotlib.pyplot as plt
 import numpy as np      
-import synthetic_maps_data as smaps 
+import real_maps_data as smaps 
 import time
 import math
 
 
 class map():
-    def __init__(self,maptype,ntiles):
+    def __init__(self):
         self.smap          = self.init_map()
     
     def init_map(self):
-        return smaps.Map(ntiles,maptype)
+        return smaps.Map()
             
-
-    def init_display(self,tilesize,margin):
-        self.smap.init_display(tilesize,margin)
-
-    def draw(self):
-        self.smap.draw_display()
         
 class civ():
     def __init__(self,no,x,y):
@@ -53,30 +47,32 @@ class civ():
         if tile.ttype=="desert":
             self.nomad=True
     def tilefull(self,tile,moving,travel):
-        new,crossing=choice(tile.touching)
-        if new.coastal:
-            travel-=1
-        else:
-            travel-=move[new.ttype]
-        if travel>-1 and moving>0:
-            if new.owner==-1:
-                new.pop=moving
-                self.gainsquare(new)
-                return False,False,False
-            elif new.owner==self.no:
-                if new.town:
-                    settling=tile.food+self.produce*(1-maxtax)-new.pop
-                else:
-                    settling=new.food*self.towntithe-new.pop
-                if settling>0:
-                    new.pop+=min(settling,moving)
-                    moving=max(0,moving-settling)
-                return self.tilefull(new,moving,travel)
+        if tile.touching:
+            new,crossing=choice(tile.touching)
+            if new.coastal:
+                travel-=1
             else:
-                return new,moving,crossing
+                travel-=move[new.ttype]
+            if travel>-1 and moving>0:
+                if new.owner==-1:
+                    new.pop=moving
+                    self.gainsquare(new)
+                    return False,False,False
+                elif new.owner==self.no:
+                    if new.town:
+                        settling=tile.food+self.produce*(1-maxtax)-new.pop
+                    else:
+                        settling=new.food*self.towntithe-new.pop
+                    if settling>0:
+                        new.pop+=min(settling,moving)
+                        moving=max(0,moving-settling)
+                    return self.tilefull(new,moving,travel)
+                else:
+                    return new,moving,crossing
+            else:
+                return False,False,False
         else:
             return False,False,False
-    
     def tick(self):
         full=0
         targets={}
@@ -225,32 +221,37 @@ class civ():
         
 
 
-ntiles   = (150, 80)
-tilesize      = (12, 12)
+ntiles   = (400, 200)
+tilesize      = (6, 6)
 margin  = 1
-maptype = "continent"
 
 popgrowth=1.05
-food={"plains":1000,"desert":200,"mountain":100,"alpine":0,"sea":0}
-defencebonus={"plains":1,"desert":1.2,"mountain":2}
+food={"plains":1000,"desert":50,"mountain":100,"alpine":0,"sea":0,"forest":200}
+defencebonus={"plains":1,"desert":1.2,"mountain":2,"forest":2}
 riverbonus=2
-armybonus=5
-move={"plains":2,"desert":2,"mountain":3,"sea":4}
+armybonus=10
+move={"plains":2,"desert":2,"mountain":3,"sea":4,"forest":3}
 combatmod=3
 militia=0.05
 victoryloss=0.1
 defeatloss=0.5
 stalemate=0.2
 maxtax=0.8
+fig,ax=plt.subplots()
+fig.set_tight_layout(True)
+world = map()
 nomadcount=1
-world = map(maptype,ntiles)
-world.init_display(tilesize,margin)
 agents={}
 for i in range(ntiles[0]):
     for j in range(ntiles[1]):
         if world.smap.tiles[(i,j)].ttype not in ["sea","alpine"]:
             agents[i+j*ntiles[0]]=civ(i+j*ntiles[0],i,j)
-world.draw()
+time=1
+#fooddata=[sum([a.produce for a in agents.values()])/len(agents)]
+#sizedata=[max([max([tile.pop for tile in a.squares if tile.town]+[1]) for a in agents.values()])]
+newdata=[0]
+deaddata=[0]
+
 while True:
     for i in range(ntiles[0]):
         for j in range(ntiles[1]):
@@ -258,7 +259,7 @@ while True:
     remove,add=[],[]
     for key,a in agents.items():
         changes=a.tick()
-        if changes=="del":
+        if changes=="del" or len(a.squares)==0:
             remove.append(key)
         elif changes:
             add+=changes
@@ -267,7 +268,10 @@ while True:
     for new in add:
         agents[ntiles[0]*ntiles[1]+nomadcount]=civ(ntiles[0]*ntiles[1]+nomadcount,new.pos[0],new.pos[1])
         nomadcount+=1
-    world.draw()
+    print("Tick")
+plt.plot(range(len(deaddata)),deaddata,label="mean size")
+plt.plot(range(len(newdata)),newdata,label="mean size")
+plt.show()
 print("fin")
 
 
