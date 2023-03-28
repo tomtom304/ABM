@@ -35,24 +35,24 @@ class civ():
         self.squares=[tile]
         self.travel=5
         tile.neighbours=tile.findneighbours(self.travel,ntiles,world.smap)
+        self.nomad=False
+        if tile.ttype=="desert":
+            self.nomad=True
         tile.touching=[]
         for i in (-1,0,1):
             for j in (-1,0,1):
                 newx=self.x+i
                 newy=self.y+j
                 if abs(i+j)==1 and -1<newx and newx<ntiles[0] and newy>-1 and newy<ntiles[1] and world.smap.tiles[newx,newy].ttype not in ("sea","alpine"):
-
-                    crossing=False
-                    for river in world.smap.rivers:
-                        if [max(self.x,newx),max(self.y,newy)] in river.links:
-                            crossing=True
-                    tile.touching.append([world.smap.tiles[newx,newy],crossing])
+                    if world.smap.tiles[newx,newy].ttype!="desert" or self.nomad:
+                        crossing=False
+                        for river in world.smap.rivers:
+                            if [max(self.x,newx),max(self.y,newy)] in river.links:
+                                crossing=True
+                        tile.touching.append([world.smap.tiles[newx,newy],crossing])
         self.towntithe=1
         self.town=False
         self.army=0
-        self.nomad=False
-        if tile.ttype=="desert":
-            self.nomad=True
     def tilefull(self,tile,moving,travel):
         if tile.touching:
             new,crossing=choice(tile.touching)

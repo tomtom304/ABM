@@ -35,46 +35,51 @@ class civ():
         self.squares=[tile]
         self.travel=5
         tile.neighbours=tile.findneighbours(self.travel,ntiles,world.smap)
+        self.nomad=False
+        if tile.ttype=="desert":
+            self.nomad=True
         tile.touching=[]
         for i in (-1,0,1):
             for j in (-1,0,1):
                 newx=self.x+i
                 newy=self.y+j
                 if abs(i+j)==1 and -1<newx and newx<ntiles[0] and newy>-1 and newy<ntiles[1] and world.smap.tiles[newx,newy].ttype not in ("sea","alpine"):
-
-                    crossing=False
-                    for river in world.smap.rivers:
-                        if [max(self.x,newx),max(self.y,newy)] in river.links:
-                            crossing=True
-                    tile.touching.append([world.smap.tiles[newx,newy],crossing])
+                    if world.smap.tiles[newx,newy].ttype!="desert" or self.nomad:
+                        crossing=False
+                        for river in world.smap.rivers:
+                            if [max(self.x,newx),max(self.y,newy)] in river.links:
+                                crossing=True
+                        tile.touching.append([world.smap.tiles[newx,newy],crossing])
         self.towntithe=1
         self.town=False
         self.army=0
-        self.nomad=False
-        if tile.ttype=="desert":
-            self.nomad=True
+        
     def tilefull(self,tile,moving,travel):
-        new,crossing=choice(tile.touching)
-        if new.coastal:
-            travel-=1
-        else:
-            travel-=move[new.ttype]
-        if travel>-1 and moving>0:
-            if new.owner==-1:
-                new.pop=moving
-                self.gainsquare(new)
-                return False,False,False
-            elif new.owner==self.no:
-                if new.town:
-                    settling=tile.food+self.produce*(1-maxtax)-new.pop
-                else:
-                    settling=new.food*self.towntithe-new.pop
-                if settling>0:
-                    new.pop+=min(settling,moving)
-                    moving=max(0,moving-settling)
-                return self.tilefull(new,moving,travel)
+        if tile.neighbours:
+
+            new,crossing=choice(tile.touching)
+            if new.coastal:
+                travel-=1
             else:
-                return new,moving,crossing
+                travel-=move[new.ttype]
+            if travel>-1 and moving>0:
+                if new.owner==-1:
+                    new.pop=moving
+                    self.gainsquare(new)
+                    return False,False,False
+                elif new.owner==self.no:
+                    if new.town:
+                        settling=tile.food+self.produce*(1-maxtax)-new.pop
+                    else:
+                        settling=new.food*self.towntithe-new.pop
+                    if settling>0:
+                        new.pop+=min(settling,moving)
+                        moving=max(0,moving-settling)
+                    return self.tilefull(new,moving,travel)
+                else:
+                    return new,moving,crossing
+            else:
+                return False,False,False
         else:
             return False,False,False
     
