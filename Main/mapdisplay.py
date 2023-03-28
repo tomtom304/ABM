@@ -51,7 +51,7 @@ class MapDisplay:
                         if tile.owner not in self.colours:
                             self.colours[tile.owner]=(random.randint(0,255),random.randint(0,255),random.randint(0,255))
                         pygame.draw.rect(self.screen, self.colours[tile.owner],
-                                         pygame.Rect(xpos, ypos, self.xsize+self.margin, self.ysize+self.margin))
+                                         pygame.Rect(xpos, ypos, self.xsize/2, self.ysize/2))
                         colour=max(0,min(255*tile.pop/tile.food,254))
                         #pygame.draw.rect(self.screen, (colour,0,255-colour),pygame.Rect(xpos+self.xsize/2, ypos+self.ysize/2, self.xsize/2, self.ysize/2))
                     if tile.town:
@@ -61,7 +61,7 @@ class MapDisplay:
                 elif displaytype==2:
                     if tile.owner!=-1:
                         pygame.draw.rect(self.screen, self.colours[tile.owner],
-                                         pygame.Rect(xpos, ypos, self.xsize, self.ysize))
+                                         pygame.Rect(xpos, ypos, self.xsize/2, self.ysize/2))
     def draw_rivers(self):        
         for river in self.rivers:
             for i in range(len(river.links)-1):
@@ -74,8 +74,8 @@ class MapDisplay:
                 if y1<y0:
                     y0,y1=y1,y0
 
-                xsize = (x1-x0)*self.tdim[0]+4*self.margin
-                ysize = (y1-y0)*self.tdim[1]+4*self.margin
+                xsize = self.tdim[0]+4*self.margin
+                ysize = self.tdim[1]+4*self.margin
                 if x1==x0:
                     xsize = 4*self.margin
                 if y1==y0:

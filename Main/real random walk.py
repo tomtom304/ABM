@@ -255,6 +255,7 @@ while True:
     for new in add:
         agents[ntiles[0]*ntiles[1]+nomadcount]=civ(ntiles[0]*ntiles[1]+nomadcount,new.pos[0],new.pos[1])
         nomadcount+=1
+    print("tick")
     world.draw()
 print("fin")
 

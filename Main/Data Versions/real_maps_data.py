@@ -76,7 +76,7 @@ class Map:
         self.tiles=self.generate()
         self.read_file()
         #self.define_alpine()
-        #self.add_rivers()
+        self.add_rivers()
         self.display = None
         self.time=0
         print ('--------------------------------------------------------------------------------------------------------------')
@@ -132,12 +132,12 @@ class Map:
                         self.tiles[x][y].ttype = 'alpine'
                             
     def add_rivers(self):
-        rid = 0
-        for x in range (self.ntiles[0]):
-            for y in range (self.ntiles[1]):
-                if (self.check_for_river(self.tiles[x][y])):
-                    self.rivers.append(self.make_river(rid,[x,y]))
-                    rid += 1
+        with open("rivers final.csv") as rawdata:
+            data = csv.reader(rawdata, delimiter=',')
+            for row in data:
+                self.rivers.append(realriver(row))
+        
+
 
     def check_for_river(self,tile):
         return (tile.ttype in PRIVER and PRIVER[tile.ttype]>rnd.random())
@@ -162,6 +162,23 @@ class Map:
         self.time+=1
         if self.display:
             self.display.draw_map(self.time)
+class realriver:
+    def __init__(self,row):
+        self.links=[]
+        newrow=""
+        for i in row[0]:
+            if i in ("(",",",")"):
+                newrow+=" "
+            else:
+                newrow+=i
+        print(newrow)
+        coords=newrow.split()
+        for i in range(0,len(coords)-1,2):
+            x,y=(float(coords[i])+20.1)*5,200-(float(coords[i+1])-20.1)*5
+            self.links.append([x,y])
+            for j in range(4):
+                current=self.tiles[(x-(j//2),y-(j%2))]
+                current.coastal=True
 
 if __name__ == '__main__' :
     #print ("Testing map generation")
