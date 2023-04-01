@@ -16,7 +16,7 @@ import csv
 # type of map: 'continent' or "med"
 
 food={"plains":1000,"desert":50,"mountain":100,"alpine":0,"sea":0,"none":0,"forest":200}
-move={"plains":2,"desert":2,"mountain":3,"sea":4,"alpine":100,"forest":3}
+move={"plains":2,"desert":2,"mountain":3,"sea":2,"alpine":100,"forest":3}
 
 
 class Tile:
@@ -153,7 +153,7 @@ class Map:
             self.display.draw_map(self.time)
 
 class realriver:
-    def __init__(self,row,atlas):
+    def __init__(self,row,realmap):
         self.links=[]
         newrow=""
         for i in row[0]:
@@ -165,13 +165,13 @@ class realriver:
         for i in range(0,len(coords)-1,2):
             x,y=int((float(coords[i])+20.1)*5),int(200-(float(coords[i+1])-20.1)*5)
             self.links.append([x,y])
-            for j in range(4):
-                try:
-                    current=atlas.tiles[(x-(j//2),y-(j%2))]
-                    current.coastal=True
-                except:
-                    pass
-
+            for m in (-1,0,1):
+                for n in (-1,0,1):
+                    newx=x+m
+                    newy=y+n
+                    if abs(m+n)==1 and -1<newx and newx<400 and newy>-1 and newy<200 and realmap.tiles[newx,newy].ttype not in ("sea","alpine"):
+                        realmap.tiles[newx,newy].coastal=True
+                        
 if __name__ == '__main__' :
     #print ("Testing map generation")
     synth_map = Map()

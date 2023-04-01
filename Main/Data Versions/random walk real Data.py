@@ -35,6 +35,7 @@ class civ():
         tile.neighbours=[]
         self.colour=(random(),random(),random())
         self.produce=1
+        self.nomad=False
         if tile.ttype=="desert":
             self.nomad=True
         tile.neighbours=[]
@@ -241,24 +242,27 @@ time=1
 #sizedata=[max([max([tile.pop for tile in a.squares if tile.town]+[1]) for a in agents.values()])]
 newdata=[0]
 deaddata=[0]
-
+sizedata=[]
 
 #plt.plot(range(len(sizedata)),sizedata,label="mean size")
 #plt.show(block=False)
-while time<1000:
+outputdata=np.array([[0 for i in range(ntiles[1])] for j in range(ntiles[0])])
+while time<4000:
     time+=1
     for i in range(ntiles[0]):
         for j in range(ntiles[1]):
             world.smap.tiles[(i,j)].pop*=popgrowth
+            if world.smap.tiles[(i,j)].owner!=-1:
+                outputdata[(i,j)]+=len(agents[world.smap.tiles[(i,j)].owner].squares)
     remove,add=[],[]
     for key,a in agents.items():
         changes=a.tick()
-        if changes=="del" or len(a.squares)==0:
+        if changes=="del" or len(a.squares)<1:
             remove.append(key)
         elif changes:
             add+=changes
-    deaddata+=[len(remove)]
-    newdata+=[len(add)]     
+    #deaddata+=[len(remove)]
+    #newdata+=[len(add)]     
     for key in remove:
         
         del agents[key]
@@ -266,14 +270,15 @@ while time<1000:
         agents[ntiles[0]*ntiles[1]+nomadcount]=civ(ntiles[0]*ntiles[1]+nomadcount,new.pos[0],new.pos[1])
         nomadcount+=1
     #sizedata+=[max([max([tile.pop for tile in a.squares if tile.town]+[1]) for a in agents.values()])]
-    #plt.plot(range(len(sizedata)),sizedata,label="mean size")
-    #plt.show(block=False)
-    #plt.pause(0.001)
+    #sizedata+=[np.percentile(np.array([len(a.squares) for a in agents.values() if len(a.squares)>1]+[1]),[75,80,85,90,95,96,97,98,99,100])]
     ######
-    print("tick")
-plt.plot(range(len(deaddata)),deaddata,label="mean size")
-plt.plot(range(len(newdata)),newdata,label="mean size")
-plt.show()
+#plt.plot(range(len(deaddata)),deaddata,label="mean size")
+#plt.plot(range(len(newdata)),newdata,label="mean size")
+#sizedata=np.array(sizedata)
+#for i in range(10):
+#    plt.plot(range(4999),sizedata[:,i],label="mean size")
+#plt.show()
+np.save("output",outputdata)
 print("fin")
 
 

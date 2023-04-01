@@ -135,7 +135,7 @@ class Map:
         with open("rivers final.csv") as rawdata:
             data = csv.reader(rawdata, delimiter=',')
             for row in data:
-                self.rivers.append(realriver(row))
+                self.rivers.append(realriver(row,self))
         
 
 
@@ -163,7 +163,7 @@ class Map:
         if self.display:
             self.display.draw_map(self.time)
 class realriver:
-    def __init__(self,row):
+    def __init__(self,row,realmap):
         self.links=[]
         newrow=""
         for i in row[0]:
@@ -171,15 +171,16 @@ class realriver:
                 newrow+=" "
             else:
                 newrow+=i
-        print(newrow)
         coords=newrow.split()
         for i in range(0,len(coords)-1,2):
-            x,y=(float(coords[i])+20.1)*5,200-(float(coords[i+1])-20.1)*5
+            x,y=int((float(coords[i])+20.1)*5),int(200-(float(coords[i+1])-20.1)*5)
             self.links.append([x,y])
-            for j in range(4):
-                current=self.tiles[(x-(j//2),y-(j%2))]
-                current.coastal=True
-
+            for m in (-1,0,1):
+                for n in (-1,0,1):
+                    newx=x+m
+                    newy=y+n
+                    if abs(m+n)==1 and -1<newx and newx<400 and newy>-1 and newy<200 and realmap.tiles[newx,newy].ttype not in ("sea","alpine"):
+                        realmap.tiles[newx,newy].coastal=True
 if __name__ == '__main__' :
     #print ("Testing map generation")
     synth_map = Map(MAPTYPE)

@@ -5,7 +5,6 @@ import real_maps_data as smaps
 import time
 import math
 
-
 class map():
     def __init__(self):
         self.smap          = self.init_map()
@@ -231,7 +230,7 @@ defencebonus={"plains":1,"desert":1.2,"mountain":2,"forest":2}
 riverbonus=2
 armybonus=10
 move={"plains":2,"desert":2,"mountain":3,"sea":4,"forest":3}
-combatmod=3
+combatmod=1
 militia=0.05
 victoryloss=0.1
 defeatloss=0.5
@@ -249,13 +248,15 @@ for i in range(ntiles[0]):
 time=1
 #fooddata=[sum([a.produce for a in agents.values()])/len(agents)]
 #sizedata=[max([max([tile.pop for tile in a.squares if tile.town]+[1]) for a in agents.values()])]
-newdata=[0]
-deaddata=[0]
+outputdata=np.array([[0 for i in range(ntiles[1])] for j in range(ntiles[0])])
 
-while True:
+while time<4000:
+    time+=1
     for i in range(ntiles[0]):
         for j in range(ntiles[1]):
             world.smap.tiles[(i,j)].pop*=popgrowth
+            if world.smap.tiles[(i,j)].owner!=-1:
+                outputdata[(i,j)]+=len(agents[world.smap.tiles[(i,j)].owner].squares)
     remove,add=[],[]
     for key,a in agents.items():
         changes=a.tick()
@@ -268,10 +269,9 @@ while True:
     for new in add:
         agents[ntiles[0]*ntiles[1]+nomadcount]=civ(ntiles[0]*ntiles[1]+nomadcount,new.pos[0],new.pos[1])
         nomadcount+=1
-    print("Tick")
-plt.plot(range(len(deaddata)),deaddata,label="mean size")
-plt.plot(range(len(newdata)),newdata,label="mean size")
-plt.show()
+#plt.plot(range(len(deaddata)),deaddata,label="mean size")
+np.save("output",outputdata)
+    
 print("fin")
 
 

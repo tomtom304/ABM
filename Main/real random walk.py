@@ -107,6 +107,7 @@ class civ():
                     if full>4:
                         sites=[site for site in self.squares if site.coastal]
                         if sites:
+                            
                             capital=choice(sites)
                             capital.town=True
                             self.town=capital
@@ -225,7 +226,7 @@ food={"plains":1000,"desert":50,"mountain":100,"alpine":0,"sea":0,"forest":200}
 defencebonus={"plains":1,"desert":1.2,"mountain":2,"forest":2}
 riverbonus=2
 armybonus=1
-move={"plains":2,"desert":2,"mountain":3,"sea":4,"forest":3}
+move={"plains":2,"desert":2,"mountain":3,"sea":2,"forest":3}
 combatmod=3
 loss=0.5
 militia=0.05
@@ -257,7 +258,6 @@ while True:
     for new in add:
         agents[ntiles[0]*ntiles[1]+nomadcount]=civ(ntiles[0]*ntiles[1]+nomadcount,new.pos[0],new.pos[1])
         nomadcount+=1
-    print("tick")
     world.draw()
 print("fin")
 
