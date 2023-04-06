@@ -1,5 +1,5 @@
 from random import *
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import numpy as np      
 import real_maps_data as smaps 
 import time
@@ -87,11 +87,11 @@ class civ():
                 self.army=tile.pop*militia
                 if self.towntithe<maxtax:
                     new,moving,crossing=self.tilefull(tile,self.produce*(maxtax-self.towntithe),self.travel)
-                    tile.pop=tile.food+self.produce*(1-maxtax)
+                    tile.pop=tile.food*maxtax+self.produce*(1-maxtax)
                     self.towntithe=maxtax
                     if new:
                         targets[new] = (targets.get(new, (0,False))[0] + moving,crossing)
-            elif tile.pop>tile.food-self.towntithe:
+            elif tile.pop>tile.food*self.towntithe:
                 if not self.town:
                     full+=1
                     if full>4:
@@ -110,61 +110,82 @@ class civ():
 
 
         newcivs=[]
-        if targets:
-            armytarget=[]
-            rebel=0
-            if self.town:
-                targetsize=ntiles[1]*ntiles[0]
-                
-                civtarget=-1
-                for target,army in targets.items():
-                    if target.owner!=-1:
-                        if target.town:
-                            armytarget=[target]
-                            targetsize=1
-                        elif len(agents[target.owner].squares)<targetsize and agents[target.owner].nomad==self.nomad :
-                            targetsize=len(agents[target.owner].squares)
-                            armytarget=[target]
-                            civtarget=target.owner
-                        elif target.owner==civtarget:
-                            armytarget+=[target]
-                        
-            for target,army in targets.items():
-                if target.owner==-1:
-                    newciv=self.gainsquare(target)
-                    if newciv:
-                        newcivs.append(newciv)
-                elif target.owner!=self.no:
-                    if target in armytarget:
-                        newciv = self.combat(target,army[0],self.army/len(armytarget),army[1])
-                    else:
-                        newciv = self.combat(target,army[0],0,army[1])
-                    if newciv:
-                        newcivs.append(newciv)
-                    if self.town:
-                        if target not in self.town.neighbours:
-                            rebel+=1
-                
-            if rebel and len(targets)!=rebel:
-                if (math.tanh(combatmod*math.log(rebel/(len(targets)-rebel)))+1)/2>=random():
-                    rebellion=choice(list(targets.keys()))
-                    rebellion.pop+=self.army*rebel/(len(targets))
-                    self.town.pop-=self.army*rebel/(len(targets))
-                                                    
-                    newcivs.append(rebellion)
+##        if targets:
+##            armytarget=[]
+##            rebel=0
+##            if self.town:
+##                targetsize=ntiles[1]*ntiles[0]
+##                
+##                civtarget=-1
+##                for target,army in targets.items():
+##                    if target.owner!=-1:
+##                        if target.town:
+##                            armytarget=[target]
+##                            targetsize=1
+##                        elif len(agents[target.owner].squares)<targetsize and agents[target.owner].nomad==self.nomad :
+##                            targetsize=len(agents[target.owner].squares)
+##                            armytarget=[target]
+##                            civtarget=target.owner
+##                        elif target.owner==civtarget:
+##                            armytarget+=[target]
+##                        
+##            for target,army in targets.items():
+##                if target.owner==-1:
+##                    newciv=self.gainsquare(target)
+##                    if newciv:
+##                        newcivs.append(newciv)
+##                elif target.owner!=self.no:
+##                    if target in armytarget:
+##                        newciv = self.combat(target,army[0],self.army/len(armytarget),army[1])
+##                    else:
+##                        newciv = self.combat(target,army[0],0,army[1])
+##                    if newciv:
+##                        newcivs.append(newciv)
+##                    if self.town:
+##                        if target not in self.town.neighbours:
+##                            rebel+=1
+##                
+##            if rebel and len(targets)!=rebel:
+##                if (math.tanh(combatmod*math.log(rebel/(len(targets)-rebel)))+1)/2>=random():
+##                    rebellion=choice(list(targets.keys()))
+##                    rebellion.pop+=self.army*rebel/(len(targets))
+##                    self.town.pop-=self.army*rebel/(len(targets))
+##                                                    
+##                    newcivs.append(rebellion)
+        rebel=0
+        conflictlist=[]
+        for target,army in targets.items():
+            if target.owner!=-1:
+                newciv = self.combat(target,army[0],self.army/len(targets),army[1])
+                if newciv:
+                    newcivs.append(newciv)
+                else:
+                    conflictlist+=[target]
+                if self.town:
+                    if target not in self.town.neighbours:
+                        rebel+=1
+            else:
+                self.gainsquare(target)
+        if rebel and len(targets)!=rebel:
+            if (math.tanh(combatmod*math.log(rebel/(len(targets)-rebel)))+1)/2>=random():
+                rebellion=choice(list(targets.keys()))
+                rebellion.pop+=self.army-rebel/(len(targets))
+                self.town.pop-=self.army-rebel/(len(targets))
+
+                newcivs.append(rebellion)
         if newcivs:
-            return newcivs
+            return newcivs,conflictlist
         elif not self.squares:
-            return "del"
+            return "del",conflictlist
         else:
-            return False
+            return False,conflictlist
     def combat(self,target,mob,army,crossing):
         targetagent=agents[target.owner]
         attackers=[pos for pos in target.neighbours if pos.owner == self.no]
         defenders=[pos for pos in target.neighbours if pos.owner == targetagent.no]
         defendingarmy=0
-        if mob>target.pop*militia:
-            defendingarmy=targetagent.army
+        #if mob>target.pop*militia:
+        #    defendingarmy=targetagent.army
         attack=sum(pos.pop*militia for pos in attackers)+mob+army*armybonus
         defence=sum(pos.pop*militia for pos in defenders)+defendingarmy*armybonus
         defence*=(defencebonus[target.ttype]+riverbonus*crossing)
@@ -234,10 +255,10 @@ combatmod=1
 militia=0.05
 victoryloss=0.1
 defeatloss=0.5
-stalemate=0.2
+stalemate=0.3
 maxtax=0.8
-fig,ax=plt.subplots()
-fig.set_tight_layout(True)
+#fig,ax=plt.subplots()
+#fig.set_tight_layout(True)
 world = map()
 nomadcount=1
 agents={}
@@ -245,32 +266,56 @@ for i in range(ntiles[0]):
     for j in range(ntiles[1]):
         if world.smap.tiles[(i,j)].ttype not in ["sea","alpine"]:
             agents[i+j*ntiles[0]]=civ(i+j*ntiles[0],i,j)
+print("civs init")
 time=1
-#fooddata=[sum([a.produce for a in agents.values()])/len(agents)]
-#sizedata=[max([max([tile.pop for tile in a.squares if tile.town]+[1]) for a in agents.values()])]
-outputdata=np.array([[0 for i in range(ntiles[1])] for j in range(ntiles[0])])
-
-while time<4000:
+popdist=[]
+towndist=[]
+longevitydata=np.array([[0 for i in range(ntiles[1])] for j in range(ntiles[0])])
+conflictdata=np.array([[0 for i in range(ntiles[1])] for j in range(ntiles[0])])
+towndata=np.array([[0 for i in range(ntiles[1])] for j in range(ntiles[0])])
+popdata=np.array([[0 for i in range(ntiles[1])] for j in range(ntiles[0])])
+sizedata=[]
+end=2000
+while time<end:
     time+=1
     for i in range(ntiles[0]):
         for j in range(ntiles[1]):
-            world.smap.tiles[(i,j)].pop*=popgrowth
-            if world.smap.tiles[(i,j)].owner!=-1:
-                outputdata[(i,j)]+=len(agents[world.smap.tiles[(i,j)].owner].squares)
+            currenttile=world.smap.tiles[(i,j)]
+            currenttile.pop*=popgrowth
+            if currenttile.owner!=-1:
+                longevitydata[(i,j)]+=len(agents[currenttile.owner].squares)
+                towndata[(i,j)]+=currenttile.town
+                popdata[(i,j)]+=min(currenttile.pop,food[currenttile.ttype])/1000
     remove,add=[],[]
     for key,a in agents.items():
-        changes=a.tick()
+        changes,fights=a.tick()
         if changes=="del" or len(a.squares)==0:
             remove.append(key)
         elif changes:
             add+=changes
+        for fight in fights:
+            conflictdata[fight.pos]+=1
     for key in remove:
         del agents[key]
     for new in add:
         agents[ntiles[0]*ntiles[1]+nomadcount]=civ(ntiles[0]*ntiles[1]+nomadcount,new.pos[0],new.pos[1])
         nomadcount+=1
-#plt.plot(range(len(deaddata)),deaddata,label="mean size")
-np.save("output",outputdata)
+    sizedata+=[np.percentile(np.array([len(a.squares) for a in agents.values() if len(a.squares)>1]+[1]),[1,25,50,75,100])]
+    popdist+=[np.percentile(np.array([sum([tile.pop for tile in a.squares]) for a in agents.values() if len(a.squares)>0]),[0,25,50,75,100])]
+    towndist+=[np.percentile(np.array([sum([tile.pop for tile in a.squares if tile.town]) for a in agents.values() if len(a.squares)>0]),[0,25,50,75,100])]
+np.save("longevity",longevitydata)
+np.save("town",towndata)
+np.save("pop",popdata)
+np.save("conflict",conflictdata)
+sizedata=np.array(sizedata)
+np.save("sizedist",sizedata)
+popdist=np.array(popdist)
+np.save("popdist",popdist)
+towndist=np.array(towndist)
+np.save("towndist",towndist)
+#for i in range(5):
+#    plt.plot(range(end-1),sizedata[:,i],label="mean size")
+#plt.show()
     
 print("fin")
 

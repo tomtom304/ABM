@@ -100,7 +100,9 @@ class Map:
                 if int(row[4]) in (200,80,90):
                     self.tiles[x,y].ttype="sea"
                     for i in range(4):
-                        self.tiles[(x-(i//2)),(y-(i%2))].coastal=True
+                        m,n=x-(i//2),y-(i%2)
+                        if -1<m and m<self.ntiles[0] and n>-1 and n<self.ntiles[1]:
+                            self.tiles[(m,n)].coastal=True
                 elif int(row[4])==60:
                     self.tiles[x,y].ttype="desert"
                 elif int(row[4]) in (40,50):
@@ -114,22 +116,7 @@ class Map:
                 else:
                     self.tiles[x,y].ttype="mountain"
 
-    
-            
-    
 
-    def define_alpine(self):
-        for x in range (self.ntiles[0]):
-            for y in range (self.ntiles[1]):
-                if self.tiles[x][y].ttype == 'mountain':
-                    is_alpine = True
-                    for dx in range (-5,6):
-                        for dy in range (-5,6):
-                            if (self.check_pos([x+dx,y+dy]) and
-                                not(self.tiles[x+dx][y+dy].ttype == 'mountain' or self.tiles[x+dx][y+dy].ttype == 'alpine')):
-                                is_alpine = False
-                    if is_alpine:
-                        self.tiles[x][y].ttype = 'alpine'
                             
     def add_rivers(self):
         with open("rivers final.csv") as rawdata:

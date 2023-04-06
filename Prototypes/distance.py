@@ -259,7 +259,7 @@ class MapDisplay:
         timetext=pygame.font.SysFont("Times New Roman",50).render(str(time),False,(250,0,0))
         self.draw_tiles()
         self.draw_rivers()
-        self.screen.blit(timetext,(0,0))
+        #self.screen.blit(timetext,(0,0))
         if self.display:
             pygame.display.flip()
 
@@ -279,6 +279,8 @@ class MapDisplay:
                 pygame.draw.rect(self.screen, self.display_colour(tile),pygame.Rect(xpos, ypos, self.xsize, self.ysize))
                 if distance:
                     pygame.draw.rect(self.screen, (distance*10,0,256-distance*10),pygame.Rect(xpos, ypos, self.xsize/2, self.ysize/2))
+                if x==25 and y==25:
+                    pygame.draw.rect(self.screen, (0,0,0),pygame.Rect(xpos, ypos, self.xsize, self.ysize))
                     
     def draw_rivers(self):        
         for river in self.rivers:
@@ -322,8 +324,8 @@ class MapDisplay:
 if __name__ == '__main__' :
     #print ("Testing map generation")
     ntiles=(50,50)
-    tilesize      = (20, 20)
-    margin  = 1
+    tilesize      = (25, 25)
+    margin  = 2
     maptype = "continent"
     world = Map(ntiles,maptype)
     world.init_display(tilesize,margin)
