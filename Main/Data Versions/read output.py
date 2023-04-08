@@ -8,7 +8,8 @@ filenames=("longevity","town","pop","conflict")
 
 
 pygame.init()
-pygame.display.set_caption('Synthetic Map Generation')
+
+pygame.display.set_caption("Real Map")
 screen = pygame.display.set_mode( (400*4, 200*4) )
 for name in filenames:
     data = np.load(name+".npy")

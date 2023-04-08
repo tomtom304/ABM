@@ -1,13 +1,13 @@
 import pygame
 import random
 PLAINS      = (154, 205,  50)
-Forrest = (100,150,25)
+Forest = (70,100,25)
 DESERT     = (255, 215, 100)
 MOUNTAIN = (139,  69,  19)
 ALPINE        = (225,245,255)
 SEA            = ( 70, 130, 180)
 NOTHING   = (  0,   0,   0)
-save=False
+save=True
 
 class MapDisplay:
     def __init__(self, fullmap,screen,tdim,margin):
@@ -25,13 +25,13 @@ class MapDisplay:
             self.colours[i]=(random.randint(0,255),random.randint(0,255),random.randint(0,255))
     def draw_map(self,time):
         self.screen.fill((0,0,0))
-        timetext=pygame.font.SysFont("Times New Roman",50).render(str(time-5000),False,(250,0,0))
+        timetext=pygame.font.SysFont("Times New Roman",50).render(str(time),False,(250,0,0))
         self.draw_tiles()
         self.draw_rivers()
-        self.screen.blit(timetext,(0,0))
+        #self.screen.blit(timetext,(0,0))
         if self.display:
             pygame.display.flip()
-            if save:
+            if save and time==1:
                 filename="screen_%04d.png" % time
                 pygame.image.save(self.screen,filename)
 
@@ -47,16 +47,16 @@ class MapDisplay:
                 if displaytype==1:
                     pygame.draw.rect(self.screen, self.display_colour(tile),
                                      pygame.Rect(xpos, ypos, self.xsize, self.ysize))
-                    if tile.owner!=-1:
-                        if tile.owner not in self.colours:
-                            self.colours[tile.owner]=(random.randint(0,255),random.randint(0,255),random.randint(0,255))
-                        pygame.draw.rect(self.screen, self.colours[tile.owner],
-                                         pygame.Rect(xpos, ypos, self.xsize/2, self.ysize/2))
-                        colour=max(0,min(255*tile.pop/tile.food,254))
-                        #pygame.draw.rect(self.screen, (colour,0,255-colour),pygame.Rect(xpos+self.xsize/2, ypos+self.ysize/2, self.xsize/2, self.ysize/2))
-                    if tile.town:
-                        pygame.draw.rect(self.screen, "black",
-                                         pygame.Rect(xpos+self.xsize/3, ypos+self.ysize/3, self.xsize/3, self.ysize/3))
+                    #if tile.owner!=-1:
+                    #    if tile.owner not in self.colours:
+                    #        self.colours[tile.owner]=(random.randint(0,255),random.randint(0,255),random.randint(0,255))
+                    #    pygame.draw.rect(self.screen, self.colours[tile.owner],
+                    #                     pygame.Rect(xpos, ypos, self.xsize/2, self.ysize/2))
+                    #    colour=max(0,min(255*tile.pop/tile.food,254))
+                    #    #pygame.draw.rect(self.screen, (colour,0,255-colour),pygame.Rect(xpos+self.xsize/2, ypos+self.ysize/2, self.xsize/2, self.ysize/2))
+                    #if tile.town:
+                    ##    pygame.draw.rect(self.screen, "black",
+                    #                     pygame.Rect(xpos+self.xsize/3, ypos+self.ysize/3, self.xsize/3, self.ysize/3))
                     
                 elif displaytype==2:
                     if tile.owner!=-1:
@@ -99,8 +99,8 @@ class MapDisplay:
             return ALPINE
         elif (tile.ttype=='sea'):
             return SEA
-        elif tile.ttype=="forrest":
-            return Forrest
+        elif tile.ttype=="forest":
+            return Forest
         return NOTHING
 
 
