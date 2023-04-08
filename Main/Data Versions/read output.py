@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 save=True
 
-filenames=("longevity","town","pop","conflict")
+filenames=("longevity","pop","conflict")
 
 
 pygame.init()
