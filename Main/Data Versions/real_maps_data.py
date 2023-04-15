@@ -93,7 +93,7 @@ class Map:
     
     
     def read_file(self):
-        with open("Biome_Data.csv") as rawdata:
+        with open("/mt/home/tparker/Biome_Data.csv") as rawdata:
             data = csv.reader(rawdata, delimiter=',')
             for row in data:
                 x,y=int(row[0])-1,200-int(row[1])
@@ -119,7 +119,7 @@ class Map:
 
                             
     def add_rivers(self):
-        with open("rivers final.csv") as rawdata:
+        with open("/mt/home/tparker/rivers final.csv") as rawdata:
             data = csv.reader(rawdata, delimiter=',')
             for row in data:
                 self.rivers.append(realriver(row,self))

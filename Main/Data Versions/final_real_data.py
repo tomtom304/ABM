@@ -168,15 +168,7 @@ class civ():
                 
             else:
                 self.gainsquare(target)
-        if targets:
-            if rebel/len(targets)>0:
-                victorychance=(math.tanh(combatmod*math.log(rebel/len(targets)))+1)/2
-                if victorychance>=random():
-                    rebellion=choice(list(targets.keys()))
-                    rebellion.pop+=self.army-rebel/(len(targets))
-                    self.town.pop-=self.army-rebel/(len(targets))
-
-                    newcivs.append(rebellion)
+        
         if newcivs:
             return newcivs,conflictlist
         elif not self.squares:
@@ -249,7 +241,7 @@ ntiles   = (400, 200)
 tilesize      = (6, 6)
 margin  = 1
 
-popgrowth=1.05
+popgrowth=1.2
 food={"plains":1000,"desert":50,"mountain":100,"alpine":0,"sea":0,"forest":200}
 defencebonus={"plains":1,"desert":1.2,"mountain":2,"forest":2}
 riverbonus=2
@@ -288,10 +280,11 @@ while time<end:
         for j in range(ntiles[1]):
             currenttile=world.smap.tiles[(i,j)]
             currenttile.pop*=popgrowth
-            if currenttile.owner!=-1:
-                longevitydata[(i,j)]+=len(agents[currenttile.owner].squares)
-                towndata[(i,j)]+=currenttile.town
-                popdata[(i,j)]+=min(currenttile.pop,food[currenttile.ttype])/food[currenttile.ttype]
+            if currenttile.owner!=-1 and len(agents[currenttile.owner].squares)>200:
+                
+                longevitydata[(i,j)]+=1
+                #towndata[(i,j)]+=currenttile.town
+                #popdata[(i,j)]+=min(currenttile.pop,food[currenttile.ttype])/food[currenttile.ttype]
     remove,add=[],[]
     for key,a in agents.items():
         changes,fights=a.tick()
@@ -306,9 +299,9 @@ while time<end:
     for new in add:
         agents[ntiles[0]*ntiles[1]+nomadcount]=civ(ntiles[0]*ntiles[1]+nomadcount,new.pos[0],new.pos[1])
         nomadcount+=1
-    sizedata+=[np.sort(-np.partition(-np.array([len(a.squares) for a in agents.values()]),5)[:5])]
-    popdist+=[np.sort(-np.partition(-np.array([sum([tile.pop for tile in a.squares]) for a in agents.values()]),5)[:5])]
-    towndist+=[np.sort(-np.partition(-np.array([sum([tile.pop for tile in a.squares if tile.town]) for a in agents.values()]),5)[:5])]
+    #sizedata+=[np.sort(-np.partition(-np.array([len(a.squares) for a in agents.values()]),5)[:5])]
+    #popdist+=[np.sort(-np.partition(-np.array([sum([tile.pop for tile in a.squares]) for a in agents.values()]),5)[:5])]
+    #towndist+=[np.sort(-np.partition(-np.array([sum([tile.pop for tile in a.squares if tile.town]) for a in agents.values()]),5)[:5])]
     #sizedata+=[np.percentile(np.array([len(a.squares) for a in agents.values() if len(a.squares)>1]+[1]),[1,25,50,75,100])]
     #popdist+=[np.percentile(np.array([sum([tile.pop for tile in a.squares]) for a in agents.values() if len(a.squares)>0]),[0,25,50,75,100])]
     #towndist+=[np.percentile(np.array([sum([tile.pop for tile in a.squares if tile.town]) for a in agents.values() if len(a.squares)>0]),[0,25,50,75,100])]
