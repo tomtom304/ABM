@@ -31,9 +31,9 @@ class MapDisplay:
         #self.screen.blit(timetext,(0,0))
         if self.display:
             pygame.display.flip()
-            if save and time==1:
-                filename="screen_%04d.png" % time
-                pygame.image.save(self.screen,filename)
+            #i#f save and time==1:
+                #filename="screen_%04d.png" % time
+                #pygame.image.save(self.screen,filename)
 
         
     
@@ -47,16 +47,16 @@ class MapDisplay:
                 if displaytype==1:
                     pygame.draw.rect(self.screen, self.display_colour(tile),
                                      pygame.Rect(xpos, ypos, self.xsize, self.ysize))
-                    #if tile.owner!=-1:
-                    #    if tile.owner not in self.colours:
-                    #        self.colours[tile.owner]=(random.randint(0,255),random.randint(0,255),random.randint(0,255))
-                    #    pygame.draw.rect(self.screen, self.colours[tile.owner],
-                    #                     pygame.Rect(xpos, ypos, self.xsize/2, self.ysize/2))
-                    #    colour=max(0,min(255*tile.pop/tile.food,254))
-                    #    #pygame.draw.rect(self.screen, (colour,0,255-colour),pygame.Rect(xpos+self.xsize/2, ypos+self.ysize/2, self.xsize/2, self.ysize/2))
-                    #if tile.town:
-                    ##    pygame.draw.rect(self.screen, "black",
-                    #                     pygame.Rect(xpos+self.xsize/3, ypos+self.ysize/3, self.xsize/3, self.ysize/3))
+                    if tile.owner!=-1:
+                        if tile.owner not in self.colours:
+                            self.colours[tile.owner]=(random.randint(0,255),random.randint(0,255),random.randint(0,255))
+                        pygame.draw.rect(self.screen, self.colours[tile.owner],
+                                         pygame.Rect(xpos, ypos, self.xsize/2, self.ysize/2))
+                        #colour=max(0,min(255*tile.pop/tile.food,254))
+                        #pygame.draw.rect(self.screen, (colour,0,255-colour),pygame.Rect(xpos+self.xsize/2, ypos+self.ysize/2, self.xsize/2, self.ysize/2))
+                    if tile.town:
+                        pygame.draw.rect(self.screen, "black",
+                                         pygame.Rect(xpos+self.xsize/3, ypos+self.ysize/3, self.xsize/3, self.ysize/3))
                     
                 elif displaytype==2:
                     if tile.owner!=-1:

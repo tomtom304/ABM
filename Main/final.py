@@ -55,7 +55,7 @@ class civ():
         self.army=0
         
     def tilefull(self,tile,moving,travel):
-        if tile.neighbours:
+        if tile.touching:
 
             new,crossing=choice(tile.touching)
             if new.coastal:
@@ -242,7 +242,7 @@ defencebonus={"plains":1,"desert":1.2,"mountain":2}
 riverbonus=2
 armybonus=5
 move={"plains":2,"desert":2,"mountain":3,"sea":4}
-combatmod=3
+combatmod=0
 militia=0.05
 victoryloss=0.1
 defeatloss=0.5

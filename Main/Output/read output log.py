@@ -1,0 +1,48 @@
+import numpy as np
+import pygame
+import matplotlib.pyplot as plt
+
+save=True
+
+for folder in ("Base","det","fastpop","long","nonew","nonomad","norebel","random","single","slowpop"):
+
+##    filenames=("longevity","pop","conflict")
+##
+##
+##    pygame.init()
+##
+##    pygame.display.set_caption("Real Map")
+##    screen = pygame.display.set_mode( (400*4, 200*4) )
+##    for name in filenames:
+##        data=np.array([[0.0 for i in range(200)] for j in range(400)])
+##        for i in range(10):
+##            print(i)
+##            data += np.load(folder+"/"+str(i+1)+"/"+name+".npy")/10
+##        screen.fill((0,100,255))
+##        xmax=max(2000,np.partition(data.flatten(), -2)[-2])
+##        for index, x in np.ndenumerate(data):
+##            if x!=0:
+##                pygame.draw.rect(screen, (min(255,abs(255*(x/xmax))),0,0), pygame.Rect(4*index[0], 4*index[1], 4, 4))
+##        pygame.display.flip()
+##        if save:
+##            filename=folder+"/"+name+".png" 
+##            pygame.image.save(screen,filename)
+
+
+    fig=plt.figure()
+    fig.set_tight_layout(True)
+    filenames=("sizedist","popdist","towndist")
+    for name in filenames:
+        plt.figure()
+        data=np.array([[0.0 for i in range(5)] for j in range(1999)])
+        for i in range(10):
+            print(i)
+            try:
+                data += np.load(folder+"/"+str(i+1)+"/"+name+".npy")/10
+            except:
+                pass
+        for i in range(5):
+            plt.plot(range(len(data)),data[:,i],label=name)
+        plt.yscale("log")
+        plt.savefig(folder+"/"+name+"log.png")
+        plt.close()
